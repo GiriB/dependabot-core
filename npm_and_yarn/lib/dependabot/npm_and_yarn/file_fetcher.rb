@@ -127,7 +127,6 @@ module Dependabot
         ].compact        
       end
 
-
       def workspace_package_jsons
         @workspace_package_jsons ||= fetch_workspace_package_jsons
       end
