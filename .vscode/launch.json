@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "${workspaceRoot}/bin/dry-run.rb",
       "cwd": "${workspaceRoot}",
-      "useBundler": false,
+      "useBundler": true,
       "args": [
         "${input:package_manager}",
         "${input:repository}"
