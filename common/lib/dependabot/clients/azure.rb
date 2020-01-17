@@ -31,7 +31,6 @@ module Dependabot
           credentials.
           select { |cred| cred["type"] == "git_source" }.
           find { |cred| cred["host"] == source.hostname }
-
         new(source, credential)
       end
 
@@ -58,11 +57,12 @@ module Dependabot
       end
 
       def fetch_default_branch(_repo)
-        response = get(source.api_endpoint +
-          source.organization + "/" + source.project +
-          "/_apis/git/repositories/" + source.unscoped_repo)
+        #response = get(source.api_endpoint +
+          #source.organization + "/" + source.project +
+          #"/_apis/git/repositories/" + source.unscoped_repo)
 
-        JSON.parse(response.body).fetch("defaultBranch").gsub("refs/heads/", "")
+        #JSON.parse(response.body).fetch("defaultBranch").gsub("refs/heads/", "")
+        "test_rush"
       end
 
       def fetch_repo_contents(commit = nil, path = nil)
@@ -141,7 +141,7 @@ module Dependabot
 
       def create_commit(branch_name, base_commit, commit_message, files,
                         author_details)
-        content = {
+         content = {
           refUpdates: [
             { name: "refs/heads/" + branch_name, oldObjectId: base_commit }
           ],
@@ -163,6 +163,7 @@ module Dependabot
           ]
         }
 
+        puts "creating commit"
         post(source.api_endpoint + source.organization + "/" + source.project +
           "/_apis/git/repositories/" + source.unscoped_repo +
           "/pushes?api-version=5.0", content.to_json)
@@ -173,6 +174,8 @@ module Dependabot
                               pr_description, labels, work_item = nil)
         pr_description = truncate_pr_description(pr_description)
 
+        puts "in create_pull_request #{source_branch} #{target_branch}"
+        puts "#{pr_name}"
         content = {
           sourceRefName: "refs/heads/" + source_branch,
           targetRefName: "refs/heads/" + target_branch,
