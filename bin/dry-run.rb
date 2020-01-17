@@ -233,6 +233,27 @@ end
 
 option_parse.parse!
 
+#unless ENV["LOCAL_GITHUB_ACCESS_TOKEN"].to_s.strip.empty?
+  $options[:credentials] << {
+    "type" => "git_source",
+    "host" => "dev.azure.com",
+    #"username" => "x-access-token",
+    "password" => $options[:azure_token]
+  }
+#end
+
+#unless ENV["LOCAL_CONFIG_VARIABLES"].to_s.strip.empty?
+  # For example:
+  # "[{\"type\":\"npm_registry\",\"registry\":\"registry.npmjs.org\",\"token\":\"123\"}]"
+  #$options[:credentials].concat(JSON.parse(ENV["LOCAL_CONFIG_VARIABLES"]))
+  $options[:credentials] << {
+    "type" => "npm_registry",
+    "registry" => "office.pkgs.visualstudio.com/_packaging/Office/npm/registry",
+    "token" => $options[:reg_token]
+  }
+#end
+
+
 # Full name of the GitHub repo you want to create pull requests for
 if ARGV.length < 2
   puts option_parse.help
