@@ -150,7 +150,7 @@ module Dependabot
       options ||= {}
       headers = options.delete(:headers)
       {
-        connect_timeout: 5,
+        connect_timeout: 10,
         write_timeout: 5,
         read_timeout: 20,
         omit_default_port: true,

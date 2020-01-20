@@ -163,7 +163,6 @@ module Dependabot
           ]
         }
 
-        puts "creating commit"
         post(source.api_endpoint + source.organization + "/" + source.project +
           "/_apis/git/repositories/" + source.unscoped_repo +
           "/pushes?api-version=5.0", content.to_json)
