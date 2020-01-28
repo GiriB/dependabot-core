@@ -173,8 +173,8 @@ module Dependabot
                               pr_description, labels, work_item = nil)
         pr_description = truncate_pr_description(pr_description)
 
-        puts "in create_pull_request #{source_branch} #{target_branch}"
-        puts "#{pr_name}"
+        puts "Create pull request from source: #{source_branch} to target: #{target_branch}"
+        puts "PR name:#{pr_name}"
         content = {
           sourceRefName: "refs/heads/" + source_branch,
           targetRefName: "refs/heads/" + target_branch,
