@@ -250,16 +250,13 @@ unless ENV["LOCAL_GITHUB_ACCESS_TOKEN"].to_s.strip.empty?
   }
 end
 
-#unless ENV["LOCAL_CONFIG_VARIABLES"].to_s.strip.empty?
+unless ENV["LOCAL_CONFIG_VARIABLES"].to_s.strip.empty?
   # For example:
   # "[{\"type\":\"npm_registry\",\"registry\":\"registry.npmjs.org\",\"token\":\"123\"}]"
-  #$options[:credentials].concat(JSON.parse(ENV["LOCAL_CONFIG_VARIABLES"]))
-  $options[:credentials] << {
-    "type" => "npm_registry",
-    "registry" => "office.pkgs.visualstudio.com/_packaging/Office/npm/registry",
-    "token" => $options[:reg_token]
-  }
-#end
+  $options[:credentials].concat(JSON.parse(ENV["LOCAL_CONFIG_VARIABLES"]))
+end
+
+
 
 # Full name of the GitHub repo you want to create pull requests for
 if ARGV.length < 2
@@ -268,6 +265,25 @@ if ARGV.length < 2
 end
 
 $package_manager, $repo_name = ARGV
+
+def read_user_npmrc
+ puts "reading user .npmrc file"
+ home = ENV["HOME"].to_s.strip
+ npmrc_path = "#{home}/.npmrc"
+ puts "#{npmrc_path}"
+ file_data = File.read(npmrc_path).split if File.exist?(npmrc_path)
+ file_data.each do |registry|
+   registry_details = registry.split("=")
+   registry = registry_details.at(0).split("/:_authToken")
+   $options[:credentials] << {
+     "type" => "npm_registry",
+     "registry" => registry.at(0)[2..-1],
+     "token" => registry_details.at(1)
+   }
+  end
+end
+
+read_user_npmrc
 
 def show_diff(original_file, updated_file)
   return unless original_file
