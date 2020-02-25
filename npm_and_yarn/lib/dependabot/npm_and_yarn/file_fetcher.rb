@@ -29,6 +29,10 @@ module Dependabot
         "Repo must contain a package.json."
       end
 
+      def npmrc_content
+        npmrc.content
+      end
+
       private
 
       def fetch_files

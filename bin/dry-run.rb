@@ -228,6 +228,18 @@ option_parse = OptionParser.new do |opts|
           "Output pull request information: title, description") do
     $options[:pull_request] = true
   end
+  opts.on("--registry-token TOKEN", "Azure PAT for accessing private feeds") do |value|
+    $options[:reg_token] = value
+  end
+  opts.on("--github-access-token TOKEN", "Github PAT for accessing github based repos") do |value|
+    $options[:github_token] = value
+  end
+  opts.on("--pr-count COUNT", "Count of the maximum PR's to raise in a single run") do |value|
+    if value.to_i <= 0
+      raise "Invalid PR count"
+    end
+    $options[:pr_count] = value.to_i
+  end
 end
 # rubocop:enable Metrics/BlockLength
 
@@ -242,19 +254,21 @@ option_parse.parse!
   }
 #end
   
-unless ENV["LOCAL_GITHUB_ACCESS_TOKEN"].to_s.strip.empty?
+#unless ENV["LOCAL_GITHUB_ACCESS_TOKEN"].to_s.strip.empty?
   $options[:credentials] << {
     "type" => "git_source",
     "host" => "github.com",
-    "password" => ENV["LOCAL_GITHUB_ACCESS_TOKEN"]
+    "password" => $options[:github_token]
   }
-end
+#end
 
-unless ENV["LOCAL_CONFIG_VARIABLES"].to_s.strip.empty?
+#unless ENV["LOCAL_CONFIG_VARIABLES"].to_s.strip.empty?
   # For example:
   # "[{\"type\":\"npm_registry\",\"registry\":\"registry.npmjs.org\",\"token\":\"123\"}]"
-  $options[:credentials].concat(JSON.parse(ENV["LOCAL_CONFIG_VARIABLES"]))
-end
+  #$options[:credentials].concat(JSON.parse(ENV["LOCAL_CONFIG_VARIABLES"]))
+  #$options[:credentials] << {
+  #}
+#end
 
 
 
@@ -266,24 +280,6 @@ end
 
 $package_manager, $repo_name = ARGV
 
-def read_user_npmrc
- puts "reading user .npmrc file"
- home = ENV["HOME"].to_s.strip
- npmrc_path = "#{home}/.npmrc"
- puts "#{npmrc_path}"
- file_data = File.read(npmrc_path).split if File.exist?(npmrc_path)
- file_data.each do |registry|
-   registry_details = registry.split("=")
-   registry = registry_details.at(0).split("/:_authToken")
-   $options[:credentials] << {
-     "type" => "npm_registry",
-     "registry" => registry.at(0)[2..-1],
-     "token" => registry_details.at(1)
-   }
-  end
-end
-
-read_user_npmrc
 
 def show_diff(original_file, updated_file)
   return unless original_file
@@ -544,6 +540,46 @@ $files = if $repo_contents_path
              fetcher.files
            end
          end
+
+def create_user_npmrc
+  puts "reading user .npmrc file"
+  home = ENV["HOME"].to_s.strip
+  npmrc_path = "#{home}/.npmrc"
+  puts "#{npmrc_path}"
+
+  File.delete(npmrc_path) if File.exist?(npmrc_path)
+
+  npmrc = $fetcher.npmrc_content.split
+  registries = []
+  npmrc.each do |registry| if registry.include?("registry")
+    registries.push(registry.split('=').at(1).gsub("https:", "").gsub("http:", ""))
+  end
+  end
+
+  registries = registries.uniq
+
+  registries.each do |reg|
+    registry_url = reg
+    $options[:credentials] << {
+    "type" => "npm_registry",
+    "registry" => registry_url[2..-1],
+    "token" => Base64.encode64(":" + $options[:reg_token]).gsub("\n", "")
+    }
+    registry_username = registry_url[2..-1].split('/').at(0).split('.').at(0)
+    registry_password = Base64.encode64($options[:reg_token]).gsub("\n", "")
+    registry_email = "xyz@abc.com"
+    out_file = File.new(npmrc_path, "a")
+    registry_npmrc_content = registry_url + ":username=" + registry_username + "\n"
+    registry_npmrc_content += registry_url + ":_password=" + registry_password + "\n"
+    registry_npmrc_content += registry_url + ":email=" + registry_email + "\n"
+
+    out_file.write(registry_npmrc_content)
+    out_file.write(registry_npmrc_content)
+    out_file.close
+  end
+end
+
+create_user_npmrc
 
 # GGB: Print file names
 
