@@ -127,6 +127,7 @@ module Dependabot
       def fetch_rush_configs
         [
           fetch_file_if_present("common/config/rush/pnpm-lock.yaml"),
+          fetch_file_if_present("common/config/rush/shrinkwrap.yaml"),
           fetch_file_if_present("common/config/rush/pnpmfile.js"),
           fetch_file_if_present("common/config/rush/.npmrc"),
           fetch_file_if_present("common/scripts/install-run-rush.js"),
@@ -427,8 +428,8 @@ module Dependabot
         return {} unless rush_json
 
         JSON.parse(rush_json.content)
-      # rescue JSON::ParserError
-      #   raise Dependabot::DependencyFileNotParseable, rush_json.path
+      rescue JSON::ParserError
+        raise Dependabot::DependencyFileNotParseable, rush_json.path
       end
     end
   end
