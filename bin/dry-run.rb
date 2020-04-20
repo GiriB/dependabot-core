@@ -240,6 +240,9 @@ option_parse = OptionParser.new do |opts|
     end
     $options[:pr_count] = value.to_i
   end
+  opts.on("--exclusions EXCLUSIONS", "List of dependencies to exclude") do |value|
+    $options[:exclusions] = Set.new(value.split(",").map(&:strip))
+  end
 end
 # rubocop:enable Metrics/BlockLength
 
