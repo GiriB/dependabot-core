@@ -318,7 +318,7 @@ module Dependabot
 
           OpenStruct.new(
             name: File.basename(entry.fetch("relativePath")),
-            path: entry.fetch("relativePath"),
+            path: path + "/" + entry.fetch("relativePath"),
             type: type,
             size: entry.fetch("size")
           )
