@@ -91,7 +91,7 @@ module Dependabot
 
         tree_response = get(tree_url)
 
-       JSON.parse(tree_response.body).fetch("objectId")
+        JSON.parse(tree_response.body).fetch("objectId")
       end
 
       def fetch_file_contents(commit, path)
