@@ -91,7 +91,7 @@ module Dependabot
 
         tree_response = get(tree_url)
 
-        JSON.parse(tree_response.body).fetch("objectId")
+       JSON.parse(tree_response.body).fetch("objectId")
       end
 
       def fetch_file_contents(commit, path)
@@ -150,7 +150,7 @@ module Dependabot
               author: author_details,
               changes: files.map do |file|
                 {
-                  changeType: fetch_repo_contents(base_commit, file.path).length == 1 ? "edit": "add", #else "add", #"edit",
+                  changeType: file_exists?(base_commit, file.path) ? "edit": "add",
                   item: { path: file.path },
                   newContent: {
                     content: Base64.encode64(file.content),
