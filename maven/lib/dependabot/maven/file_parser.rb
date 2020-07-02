@@ -128,7 +128,7 @@ module Dependabot
         return unless dependency_node.at_xpath("./groupId")
         return unless dependency_node.at_xpath("./artifactId")
 
-        [
+        name = [
           evaluated_value(
             dependency_node.at_xpath("./groupId").content.strip,
             pom
@@ -138,6 +138,15 @@ module Dependabot
             pom
           )
         ].join(":")
+
+        if dependency_node.at_xpath("./classifier")
+          name += ":#{evaluated_value(
+            dependency_node.at_xpath('./classifier').content.strip,
+            pom
+          )}"
+        end
+
+        name
       end
 
       def dependency_classifier(dependency_node, pom)
