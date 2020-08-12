@@ -6,7 +6,7 @@ async function runRushUpdate(rootPath, shrinkwrapFilePath){
 
     return new Promise( (resolve, reject)  => {
     
-        exec('node common/scripts/install-run-rush.js update --no-link --bypass-policy', { maxBuffer: 1024 * 1024 * 50 }, function(err, stdout, stderr) {
+        exec('node common/scripts/install-run-rush.js update --bypass-policy', { maxBuffer: 1024 * 1024 * 50 }, function(err, stdout, stderr) {
             if(err){ 
                 err.message += (stdout + stderr);
                 reject(err);
