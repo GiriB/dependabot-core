@@ -38,6 +38,19 @@ module Dependabot
       end
     end
 
+    def self.in_a_temporary_repo_directory(directory = "/",
+                                           repo_contents_path = nil,
+                                           &block)
+      if repo_contents_path
+        path = Pathname.new(File.join(repo_contents_path, directory)).
+               expand_path
+        reset_git_repo(repo_contents_path)
+        Dir.chdir(path) { yield(path) }
+      else
+        in_a_temporary_directory(directory, &block)
+      end
+    end
+
     def self.in_a_temporary_directory(directory = "/")
       Dir.mkdir(Utils::BUMP_TMP_DIR_PATH) unless Dir.exist?(Utils::BUMP_TMP_DIR_PATH)
       tmp_dir = Dir.mktmpdir(Utils::BUMP_TMP_FILE_PREFIX, Utils::BUMP_TMP_DIR_PATH)
@@ -257,6 +270,12 @@ module Dependabot
       Dir.chdir(path) do
         run_shell_command("git reset HEAD --hard")
         run_shell_command("git clean -fx")
+      end
+    end
+
+    def self.reset_git_repo(path)
+      Dir.chdir(path) do
+        run_shell_command("git reset HEAD --hard && git clean -fx")
       end
     end
 
