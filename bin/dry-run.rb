@@ -63,7 +63,6 @@ $LOAD_PATH << "./python/lib"
 $LOAD_PATH << "./terraform/lib"
 
 require "bundler"
-require "json"
 ENV["BUNDLE_GEMFILE"] = File.join(__dir__, "../omnibus/Gemfile")
 Bundler.setup
 
@@ -283,7 +282,6 @@ end
 
 $package_manager, $repo_name = ARGV
 
-
 def show_diff(original_file, updated_file)
   return unless original_file
 
@@ -309,7 +307,6 @@ def show_diff(original_file, updated_file)
 end
 
 def cached_read(name)
-  puts "cache read #{name}"
   raise "Provide something to cache" unless block_given?
   return yield unless $options[:cache_steps].include?(name)
 
@@ -370,7 +367,7 @@ def cached_dependency_files_read
       puts "=> failed to read all dependency files from cache manifest: "\
            "./#{cache_manifest_path}"
     end
-    puts "=>Fetching dependency files"
+    puts "=> fetching dependency files"
     data = yield
     puts "=> dumping fetched dependency files: ./#{cache_dir}"
     manifest_data = data.map do |file|
@@ -544,47 +541,14 @@ $files = if $repo_contents_path
            end
          end
 
-def create_user_npmrc
-  puts "reading user .npmrc file"
-  home = ENV["HOME"].to_s.strip
-  npmrc_path = "#{home}/.npmrc"
-  puts "#{npmrc_path}"
+fetcher = Dependabot::FileFetchers.for_package_manager($package_manager).
+          new(source: source, credentials: $options[:credentials])
 
-  File.delete(npmrc_path) if File.exist?(npmrc_path)
+$repo_contents_path = fetcher.clone_repo_contents if $options[:clone]
 
-  npmrc = $fetcher.npmrc_content.gsub("\r\n", "\n").gsub("\r", "\n").split("\n")
-  registries = []
-  npmrc.each do |registry| if !registry.start_with?("#") && registry.include?("registry=")
-    registries.push(registry.split('=').at(1).gsub("https:", "").gsub("http:", ""))
-  end
-  end
-
-  registries = registries.uniq
-
-  registries.each do |reg|
-    registry_url = reg
-    $options[:credentials] << {
-    "type" => "npm_registry",
-    "registry" => registry_url[2..-1],
-    "token" => Base64.encode64(":" + $options[:reg_token]).gsub("\n", "")
-    }
-    registry_username = registry_url[2..-1].split('/').at(0).split('.').at(0)
-    registry_password = Base64.encode64($options[:reg_token]).gsub("\n", "")
-    registry_email = "xyz@abc.com"
-    out_file = File.new(npmrc_path, "a")
-    registry_npmrc_content = registry_url + ":username=" + registry_username + "\n"
-    registry_npmrc_content += registry_url + ":_password=" + registry_password + "\n"
-    registry_npmrc_content += registry_url + ":email=" + registry_email + "\n"
-
-    out_file.write(registry_npmrc_content)
-    out_file.write(registry_npmrc_content)
-    out_file.close
-  end
+$files = cached_dependency_files_read do
+  fetcher.files
 end
-
-create_user_npmrc
-
-# GGB: Print file names
 
 # Parse the dependency files
 puts "=> parsing dependency files"
