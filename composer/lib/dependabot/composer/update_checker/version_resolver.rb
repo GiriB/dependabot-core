@@ -317,6 +317,10 @@ module Dependabot
           elsif error.error_context[:process_termsig] == Dependabot::SharedHelpers::SIGKILL
             # If the helper was SIGKILL-ed, assume the OOMKiller did it
             raise Dependabot::OutOfMemory
+          elsif error.error_context[:process_termsig] ==
+                Dependabot::SharedHelpers::SIGKILL
+            # If the helper was SIGKILL-ed, assume the OOMKiller did it
+            raise Dependabot::OutOfMemory
           elsif error.message.start_with?("Package not found in updated") &&
                 !dependency.top_level?
             # If we can't find the dependency in the composer.lock after an

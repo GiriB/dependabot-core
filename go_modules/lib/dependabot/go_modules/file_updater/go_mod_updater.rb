@@ -292,6 +292,18 @@ module Dependabot
         def vendor?
           !!@vendor
         end
+
+        def write_go_mod(body)
+          File.write("go.mod", body)
+        end
+
+        def tidy?
+          !!@tidy
+        end
+
+        def vendor?
+          !!@vendor
+        end
       end
     end
   end

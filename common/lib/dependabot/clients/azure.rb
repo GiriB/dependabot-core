@@ -188,6 +188,7 @@ module Dependabot
           "/_apis/git/repositories/" + source.unscoped_repo +
           "/pullrequests?api-version=5.0", content.to_json)
       end
+      # rubocop:enable Metrics/ParameterLists
 
       def pull_request(pull_request_id)
         response = get(source.api_endpoint +

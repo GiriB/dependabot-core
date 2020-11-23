@@ -45,6 +45,9 @@ module Dependabot
         path = Pathname.new(File.join(repo_contents_path, directory)).
                expand_path
         reset_git_repo(repo_contents_path)
+        # Handle missing directories by creating an empty one and relying on the
+        # file fetcher to raise a DependencyFileNotFound error
+        FileUtils.mkdir_p(path) unless Dir.exist?(path)
         Dir.chdir(path) { yield(path) }
       else
         in_a_temporary_directory(directory, &block)
@@ -105,6 +108,12 @@ module Dependabot
 
       env_cmd = [env, cmd].compact
       puts "Running function #{function}"
+      if ENV["DEBUG_FUNCTION"] == function
+        escaped_stdin_data = stdin_data.gsub("\"", "\\\"")
+        puts "$ cd #{Dir.pwd} && echo \"#{escaped_stdin_data}\" | #{env_cmd.join(' ')}"
+        # Pause execution so we can run helpers inside the temporary directory
+        byebug # rubocop:disable Lint/Debugger
+      end
       stdout, stderr, process = Open3.capture3(*env_cmd, stdin_data: stdin_data)
       time_taken = Time.now - start
 
@@ -275,7 +284,8 @@ module Dependabot
 
     def self.reset_git_repo(path)
       Dir.chdir(path) do
-        run_shell_command("git reset HEAD --hard && git clean -fx")
+        run_shell_command("git reset HEAD --hard")
+        run_shell_command("git clean -fx")
       end
     end
 

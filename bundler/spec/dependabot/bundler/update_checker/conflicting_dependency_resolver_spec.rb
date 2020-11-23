@@ -61,7 +61,6 @@ RSpec.describe(Dependabot::Bundler::UpdateChecker::ConflictingDependencyResolver
 
     context "with no blocking dependencies" do
       let(:target_version) { "1.5.0" }
-
       it "returns an empty array" do
         expect(conflicting_dependencies).to match_array([])
       end

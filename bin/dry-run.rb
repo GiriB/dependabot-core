@@ -542,13 +542,16 @@ $files = if $repo_contents_path
          end
 
 fetcher = Dependabot::FileFetchers.for_package_manager($package_manager).
-          new(source: source, credentials: $options[:credentials])
-
-$repo_contents_path = fetcher.clone_repo_contents if $options[:clone]
-
-$files = cached_dependency_files_read do
-  fetcher.files
-end
+          new(source: source, credentials: $options[:credentials],
+              repo_contents_path: $repo_contents_path)
+$files = if $options[:clone] || always_clone
+           fetcher.clone_repo_contents
+           fetcher.files
+         else
+           cached_dependency_files_read do
+             fetcher.files
+           end
+         end
 
 # Parse the dependency files
 puts "=> parsing dependency files"

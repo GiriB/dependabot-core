@@ -11,7 +11,6 @@ require "dependabot/bundler/helpers"
 module Dependabot
   module Bundler
     class FileUpdater
-      # rubocop:disable Metrics/ClassLength
       class LockfileUpdater
         require_relative "gemfile_updater"
         require_relative "gemspec_updater"
@@ -303,7 +302,6 @@ module Dependabot
           @bundler_version ||= Helpers.bundler_version(lockfile)
         end
       end
-      # rubocop:enable Metrics/ClassLength
     end
   end
 end
