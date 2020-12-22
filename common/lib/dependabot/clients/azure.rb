@@ -7,6 +7,9 @@ module Dependabot
   module Clients
     class Azure
       class NotFound < StandardError; end
+
+      class InternalServerError < StandardError; end
+
       class ServiceNotAvailaible < StandardError; end
 
       class InternalServerError < StandardError; end
@@ -274,7 +277,7 @@ module Dependabot
       end
 
       private
-      
+
       def retry_connection_failures
         retry_attempt = 0
 
