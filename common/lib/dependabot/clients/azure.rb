@@ -144,7 +144,7 @@ module Dependabot
 
       def create_commit(branch_name, base_commit, commit_message, files,
                         author_details)
-         content = {
+        content = {
           refUpdates: [
             { name: "refs/heads/" + branch_name, oldObjectId: base_commit }
           ],
@@ -154,7 +154,7 @@ module Dependabot
               author: author_details,
               changes: files.map do |file|
                 {
-                  changeType: file_exists?(base_commit, file.path) ? "edit": "add",
+                  changeType: file_exists?(base_commit, file.path) ? "edit" : "add",
                   item: { path: file.path },
                   newContent: {
                     content: Base64.encode64(file.content),
