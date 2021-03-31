@@ -184,6 +184,17 @@ module Dependabot
           "/_apis/git/repositories/" + source.unscoped_repo +
           "/pullrequests?api-version=5.0", content.to_json)
       end
+
+      def auto_complete_pr(pr_id, user_vsid)
+        content = {
+          autoCompleteSetBy: { id: user_vsid }
+        }
+
+        patch(source.api_endpoint +
+          source.organization + "/" + source.project +
+          "/_apis/git/repositories/" + source.unscoped_repo +
+          "/pullrequests/" + pr_id.to_s + "?api-version=6.0", content.to_json)
+      end
       # rubocop:enable Metrics/ParameterLists
 
       def get(url)
@@ -212,6 +223,26 @@ module Dependabot
 
       def post(url, json)
         response = Excon.post(
+          url,
+          body: json,
+          user: credentials&.fetch("username", nil),
+          password: credentials&.fetch("password", nil),
+          idempotent: true,
+          **SharedHelpers.excon_defaults(
+            headers: auth_header.merge(
+              {
+                "Content-Type" => "application/json"
+              }
+            )
+          )
+        )
+        raise NotFound if response.status == 404
+
+        response
+      end
+
+      def patch(url, json)
+        response = Excon.patch(
           url,
           body: json,
           user: credentials&.fetch("username", nil),
