@@ -185,6 +185,24 @@ module Dependabot
           "/pullrequests?api-version=5.0", content.to_json)
       end
 
+      def update_pull_request(pull_request_id:, status: nil, pr_name: nil, description: nil,
+                              completion_options: nil, merge_options: nil,
+                              auto_complete_id: nil, target_branch: nil)
+        content = {
+          autoCompleteSetBy: { id: auto_complete_id }.compact,
+          title: pr_name,
+          description: description,
+          status: status,
+          completionOptions: completion_options,
+          mergeOptions: merge_options
+        }.compact
+
+        patch(source.api_endpoint +
+          source.organization + "/" + source.project +
+          "/_apis/git/repositories/" + source.unscoped_repo +
+          "/pullrequests/" + pull_request_id.to_s + "?api-version=5.0", content.to_json)
+      end
+
       def pull_request(pull_request_id)
         response = get(source.api_endpoint +
           source.organization + "/" + source.project +
@@ -234,6 +252,26 @@ module Dependabot
 
       def post(url, json)
         response = Excon.post(
+          url,
+          body: json,
+          user: credentials&.fetch("username", nil),
+          password: credentials&.fetch("password", nil),
+          idempotent: true,
+          **SharedHelpers.excon_defaults(
+            headers: auth_header.merge(
+              {
+                "Content-Type" => "application/json"
+              }
+            )
+          )
+        )
+        raise NotFound if response.status == 404
+
+        response
+      end
+
+      def patch(url, json)
+        response = Excon.patch(
           url,
           body: json,
           user: credentials&.fetch("username", nil),
