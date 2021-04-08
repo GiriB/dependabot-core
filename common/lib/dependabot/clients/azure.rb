@@ -136,7 +136,7 @@ module Dependabot
 
       def create_commit(branch_name, base_commit, commit_message, files,
                         author_details)
-         content = {
+        content = {
           refUpdates: [
             { name: "refs/heads/" + branch_name, oldObjectId: base_commit }
           ],
@@ -146,7 +146,7 @@ module Dependabot
               author: author_details,
               changes: files.map do |file|
                 {
-                  changeType: file_exists?(base_commit, file.path) ? "edit": "add",
+                  changeType: file_exists?(base_commit, file.path) ? "edit" : "add",
                   item: { path: file.path },
                   newContent: {
                     content: Base64.encode64(file.content),
@@ -187,15 +187,19 @@ module Dependabot
 
       def update_pull_request(pull_request_id:, status: nil, pr_name: nil, description: nil,
                               completion_options: nil, merge_options: nil,
-                              auto_complete_id: nil, target_branch: nil)
+                              auto_complete_setby_user_id: nil, target_branch: nil)
         content = {
-          autoCompleteSetBy: { id: auto_complete_id }.compact,
+          autoCompleteSetBy: ({ id: auto_complete_setby_user_id } unless
+                              auto_complete_setby_user_id.nil? || auto_complete_setby_user_id.strip.empty?),
           title: pr_name,
-          description: description,
+          description: truncate_pr_description(description),
           status: status,
           completionOptions: completion_options,
-          mergeOptions: merge_options
+          mergeOptions: merge_options,
+          targetRefName: ("refs/heads/" + target_branch unless target_branch.nil? || target_branch.strip.empty?)
         }.compact
+
+        return if content.empty?
 
         patch(source.api_endpoint +
           source.organization + "/" + source.project +
@@ -317,23 +321,24 @@ module Dependabot
         end
       end
 
-      
       def file_exists?(commit, path)
         # Get the file base and directory name
         dir = File.dirname(path)
         basename = File.basename(path)
 
-        # Fetch the contents for the dir and check if there exists any file that matches basename. 
+        # Fetch the contents for the dir and check if there exists any file that matches basename.
         # We ignore any sub-dir paths by rejecting "tree" gitObjectType (which is what ADO uses to specify a directory.)
-        fetch_repo_contents(commit, dir)
-            .reject { |f| f["gitObjectType"] == "tree" }
-            .one? { |f| f["relativePath"] == basename}
-
+        fetch_repo_contents(commit, dir).
+          reject { |f| f["gitObjectType"] == "tree" }.
+          one? { |f| f["relativePath"] == basename }
       rescue Dependabot::Clients::Azure::NotFound
         # ADO throws exception if dir not found. Return false
         false
       end
+
       def truncate_pr_description(pr_description)
+        return unless pr_description
+
         # Azure DevOps only support descriptions up to 4000 characters in UTF-16
         # encoding.
         # https://developercommunity.visualstudio.com/content/problem/608770/remove-4000-character-limit-on-pull-request-descri.html
