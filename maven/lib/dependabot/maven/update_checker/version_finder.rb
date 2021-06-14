@@ -15,8 +15,6 @@ module Dependabot
       class VersionFinder
         TYPE_SUFFICES = %w(jre android java native_mt agp).freeze
 
-        MAVEN_RANGE_REGEX = /[\(\[].*,.*[\)\]]/.freeze
-
         def initialize(dependency:, dependency_files:, credentials:,
                        ignored_versions:, security_advisories:,
                        raise_on_ignored: false)

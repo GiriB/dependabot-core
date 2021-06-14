@@ -7,6 +7,7 @@ require "dependabot/go_modules/native_helpers"
 require "dependabot/go_modules/update_checker/latest_version_finder"
 
 RSpec.describe Dependabot::GoModules::UpdateChecker::LatestVersionFinder do
+<<<<<<< HEAD
   let(:dependency_name) { "github.com/dependabot-fixtures/go-modules-lib" }
 
   let(:dependency_version) { "1.0.0" }
@@ -59,6 +60,62 @@ RSpec.describe Dependabot::GoModules::UpdateChecker::LatestVersionFinder do
   end
 
   describe "#latest_version" do
+=======
+  describe "#latest_version" do
+    let(:dependency_name) { "github.com/dependabot-fixtures/go-modules-lib" }
+
+    let(:dependency_version) { "1.0.0" }
+
+    let(:dependency) do
+      Dependabot::Dependency.new(
+        name: dependency_name,
+        version: dependency_version,
+        package_manager: "go_modules",
+        requirements: [{
+          file: "go.mod",
+          requirement: dependency_version,
+          groups: [],
+          source: { type: "default", source: dependency_name }
+        }]
+      )
+    end
+
+    let(:go_mod_content) do
+      <<~GOMOD
+        module foobar
+        require #{dependency_name} v#{dependency_version}
+      GOMOD
+    end
+
+    let(:dependency_files) do
+      [
+        Dependabot::DependencyFile.new(
+          name: "go.mod",
+          content: go_mod_content
+        )
+      ]
+    end
+
+    let(:ignored_versions) { [] }
+
+    let(:raise_on_ignored) { false }
+
+    let(:finder) do
+      described_class.new(
+        dependency: dependency,
+        dependency_files: dependency_files,
+        credentials: [{
+          "type" => "git_source",
+          "host" => "github.com",
+          "username" => "x-access-token",
+          "password" => "token"
+        }],
+        ignored_versions: ignored_versions,
+        raise_on_ignored: raise_on_ignored
+      )
+    end
+
+>>>>>>> a7b70eef9 (Merge main from dependabot/dependabot-core (#277))
     context "when there's a newer major version but not a new minor version" do
       it "returns the latest minor version for the dependency's current major version" do
         expect(finder.latest_version).to eq(Dependabot::GoModules::Version.new("1.1.0"))
@@ -84,7 +141,11 @@ RSpec.describe Dependabot::GoModules::UpdateChecker::LatestVersionFinder do
       end
 
       it "doesn't return to the excluded version" do
+<<<<<<< HEAD
         expect(finder.latest_version).to eq(Dependabot::GoModules::Version.new("1.0.6"))
+=======
+        expect(finder.latest_version).to eq(Dependabot::GoModules::Version.new("1.0.1"))
+>>>>>>> a7b70eef9 (Merge main from dependabot/dependabot-core (#277))
       end
     end
 
@@ -105,8 +166,13 @@ RSpec.describe Dependabot::GoModules::UpdateChecker::LatestVersionFinder do
     end
 
     context "when on a stable release and a newer prerelease is available" do
+<<<<<<< HEAD
       it "returns the newest non-prerelease" do
         expect(finder.latest_version).to eq(Dependabot::GoModules::Version.new("1.1.0"))
+=======
+      it "doesn't return pre-release" do
+        expect(finder.latest_version).to_not eq(Dependabot::GoModules::Version.new("1.2.0-pre2"))
+>>>>>>> a7b70eef9 (Merge main from dependabot/dependabot-core (#277))
       end
     end
 
@@ -186,6 +252,7 @@ RSpec.describe Dependabot::GoModules::UpdateChecker::LatestVersionFinder do
       end
     end
 
+<<<<<<< HEAD
     context "when the module is unreachable" do
       let(:dependency_files) { [go_mod] }
       let(:dependency_name) { "github.com/dependabot-fixtures/go-modules-private" }
@@ -208,6 +275,8 @@ RSpec.describe Dependabot::GoModules::UpdateChecker::LatestVersionFinder do
       end
     end
 
+=======
+>>>>>>> a7b70eef9 (Merge main from dependabot/dependabot-core (#277))
     context "with a retracted update version" do
       # latest release v1.0.1 is retracted
       let(:dependency_name) { "github.com/dependabot-fixtures/go-modules-retracted" }
@@ -258,6 +327,7 @@ RSpec.describe Dependabot::GoModules::UpdateChecker::LatestVersionFinder do
       end
     end
   end
+<<<<<<< HEAD
 
   describe "#lowest_security_fix_version" do
     subject { finder.lowest_security_fix_version }
@@ -310,4 +380,6 @@ RSpec.describe Dependabot::GoModules::UpdateChecker::LatestVersionFinder do
       end
     end
   end
+=======
+>>>>>>> a7b70eef9 (Merge main from dependabot/dependabot-core (#277))
 end

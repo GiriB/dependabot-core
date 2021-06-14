@@ -322,7 +322,8 @@ RSpec.describe Dependabot::Terraform::FileUpdater do
                 source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.4.1"
             DEP
           )
-        end
+        ]
+      end
 
         it "doesn't update the duplicate" do
           updated_file = subject.find { |file| file.name == "main.tf" }
@@ -435,7 +436,7 @@ RSpec.describe Dependabot::Terraform::FileUpdater do
                 version = "0.3.1"
             DEP
           )
-        end
+        ]
       end
 
       context "with an hcl2-based registry dependency" do
@@ -494,13 +495,14 @@ RSpec.describe Dependabot::Terraform::FileUpdater do
             version: "0.3.1",
             previous_version: "v0.1.0",
             requirements: [{
-              requirement: "0.3.1",
+              requirement: nil,
               groups: [],
               file: "main.tf",
               source: {
-                type: "registry",
-                registry_hostname: "registry.terraform.io",
-                module_identifier: "hashicorp/consul/aws"
+                type: "git",
+                url: "https://github.com/cloudposse/terraform-null-label.git",
+                branch: nil,
+                ref: "tags/0.4.1"
               }
             }],
             previous_requirements: [{
@@ -508,9 +510,10 @@ RSpec.describe Dependabot::Terraform::FileUpdater do
               groups: [],
               file: "main.tf",
               source: {
-                type: "registry",
-                registry_hostname: "registry.terraform.io",
-                module_identifier: "hashicorp/consul/aws"
+                type: "git",
+                url: "https://github.com/cloudposse/terraform-null-label.git",
+                branch: nil,
+                ref: "tags/0.3.7"
               }
             }],
             package_manager: "terraform"
@@ -1414,6 +1417,169 @@ RSpec.describe Dependabot::Terraform::FileUpdater do
           <<~DEP
             provider "registry.terraform.io/mongey/confluentcloud" {
               version     = "0.0.10"
+          DEP
+        )
+      end
+    end
+
+    context "using versions.tf with a lockfile present" do
+      let(:files) { project_dependency_files("lockfile") }
+      let(:dependencies) do
+        [
+          Dependabot::Dependency.new(
+            name: ".terraform.lock.hcl",
+            version: "3.42.0",
+            previous_version: "3.37.0",
+            requirements: [{
+              requirement: "3.42.0",
+              groups: [],
+              file: ".terraform.lock.hcl",
+              source: {
+                type: "lockfile",
+                registry_hostname: "registry.terraform.io",
+                module_identifier: "hashicorp/aws"
+              }
+            }],
+            previous_requirements: [{
+              requirement: "3.37.0",
+              groups: [],
+              file: ".terraform.lock.hcl",
+              source: {
+                type: "lockfile",
+                registry_hostname: "registry.terraform.io",
+                module_identifier: "hashicorp/aws"
+              }
+            }],
+            package_manager: "terraform"
+          )
+        ]
+      end
+
+      it "does not update requirements in the `versions.tf` file" do
+        updated_file = files.find { |file| file.name == "versions.tf" }
+
+        expect(updated_file.content).to include(
+          <<~DEP
+            terraform {
+              required_providers {
+                random = {
+                  source  = "hashicorp/random"
+                  version = ">= 3.0.0"
+                }
+
+                aws = {
+                  source  = "hashicorp/aws"
+                  version = ">= 3.37.0"
+                }
+              }
+          DEP
+        )
+      end
+
+      it "updates the aws requirement in the lockfile" do
+        actual_lockfile = subject.find { |file| file.name == ".terraform.lock.hcl" }
+
+        expect(actual_lockfile.content).to include(
+          <<~DEP
+            provider "registry.terraform.io/hashicorp/aws" {
+              version     = "3.45.0"
+              constraints = ">= 3.37.0"
+              hashes = [
+                "h1:LKU/xfna87/p+hl5yTTW3dvOqWJp5JEM+Dt3nnvSDvA=",
+                "zh:0fdbb3af75ff55807466533f97eb314556ec41a908a543d7cafb06546930f7c6",
+                "zh:20656895744fa0f4607096b9681c77b2385f450b1577f9151d3070818378a724",
+                "zh:390f316d00f25a5e45ef5410961fd05bf673068c1b701dc752d11df6d8e741d7",
+                "zh:3da70f9de241d5f66ea9994ef1e0beddfdb005fa2d2ef6712392f57c5d2e4844",
+                "zh:65de63cc0f97c85c28a19db560c546aa25f4f403dbf4783ac53c3918044cf180",
+                "zh:6fc52072e5a66a5d0510aaa2b373a2697895f51398613c68619d8c0c95fc75f5",
+                "zh:7c1da61092bd1206a020e3ee340ab11be8a4f9bb74e925ca1229ea5267fb3a62",
+                "zh:94e533d86ce3c08e7102dcabe34ba32ae7fd7819fd0aedef28f48d29e635eae2",
+                "zh:a3180d4826662e19e71cf20e925a2be8613a51f2f3f7b6d2643ac1418b976d58",
+                "zh:c783df364928c77fd4dec5419533b125bebe2d50212c4ad609f83b701c2d981a",
+                "zh:e1279bde388cb675d324584d965c6d22c3ec6890b13de76a50910a3bcd84ed64",
+              ]
+            }
+          DEP
+        )
+      end
+
+      it "does not update the http requirement in the lockfile" do
+        actual_lockfile = subject.find { |file| file.name == ".terraform.lock.hcl" }
+
+        expect(actual_lockfile.content).to include(
+          <<~DEP
+            provider "registry.terraform.io/hashicorp/random" {
+              version     = "3.0.0"
+              constraints = ">= 3.0.0"
+              hashes = [
+                "h1:yhHJpb4IfQQfuio7qjUXuUFTU/s+ensuEpm23A+VWz0=",
+                "zh:0fcb00ff8b87dcac1b0ee10831e47e0203a6c46aafd76cb140ba2bab81f02c6b",
+                "zh:123c984c0e04bad910c421028d18aa2ca4af25a153264aef747521f4e7c36a17",
+                "zh:287443bc6fd7fa9a4341dec235589293cbcc6e467a042ae225fd5d161e4e68dc",
+                "zh:2c1be5596dd3cca4859466885eaedf0345c8e7628503872610629e275d71b0d2",
+                "zh:684a2ef6f415287944a3d966c4c8cee82c20e393e096e2f7cdcb4b2528407f6b",
+                "zh:7625ccbc6ff17c2d5360ff2af7f9261c3f213765642dcd84e84ae02a3768fd51",
+                "zh:9a60811ab9e6a5bfa6352fbb943bb530acb6198282a49373283a8fa3aa2b43fc",
+                "zh:c73e0eaeea6c65b1cf5098b101d51a2789b054201ce7986a6d206a9e2dacaefd",
+                "zh:e8f9ed41ac83dbe407de9f0206ef1148204a0d51ba240318af801ffb3ee5f578",
+                "zh:fbdd0684e62563d3ac33425b0ac9439d543a3942465f4b26582bcfabcb149515",
+              ]
+            }
+          DEP
+        )
+      end
+    end
+
+    describe "for a provider with an implicit source" do
+      let(:files) { project_dependency_files("provider_implicit_source") }
+      let(:dependencies) do
+        [
+          Dependabot::Dependency.new(
+            name: "oci",
+            version: "3.28",
+            previous_version: "3.27",
+            requirements: [{
+              requirement: "3.28",
+              groups: [],
+              file: "main.tf",
+              source: {
+                type: "provider",
+                registry_hostname: "registry.terraform.io",
+                module_identifier: "hashicorp/oci"
+              }
+            }],
+            previous_requirements: [{
+              requirement: "3.27",
+              groups: [],
+              file: "main.tf",
+              source: {
+                type: "provider",
+                registry_hostname: "registry.terraform.io",
+                module_identifier: "hashicorp/oci"
+              }
+            }],
+            package_manager: "terraform"
+          )
+        ]
+      end
+
+      it "updates the requirement" do
+        updated_file = subject.find { |file| file.name == "main.tf" }
+
+        expect(updated_file.content).to include(
+          <<~DEP
+            terraform {
+              required_version = ">= 0.12"
+
+              required_providers {
+                http = {
+                  source = "hashicorp/http"
+                  version = "2.0.0"
+                }
+
+                oci = { // When no `source` is specified, use the implied `hashicorp/oci` source address
+                  version = "3.28"
+                }
           DEP
         )
       end
