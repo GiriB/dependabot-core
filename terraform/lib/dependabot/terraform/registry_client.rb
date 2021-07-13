@@ -66,7 +66,7 @@ module Dependabot
         return nil unless response.status == 200
 
         source_url = JSON.parse(response.body).fetch("source")
-        Source.from_url(source_url) if source_surl
+        Source.from_url(source_url) if source_url
       rescue JSON::ParserError, Excon::Error::Timeout
         nil
       end
