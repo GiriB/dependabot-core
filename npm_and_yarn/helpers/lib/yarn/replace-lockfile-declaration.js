@@ -40,7 +40,7 @@ module.exports = (
   const newPackageReqs = getRequestedVersions(depName, newJson);
 
   const reqToReplace = newPackageReqs.find((pattern) => {
-    return !oldPackageReqs.includes(pattern);
+    return pattern !== newVersionRequirement && !oldPackageReqs.includes(pattern);
   });
 
   // If the new lockfile has entries that don't exist in the old lockfile,
