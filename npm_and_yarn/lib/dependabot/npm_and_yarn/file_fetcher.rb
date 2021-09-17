@@ -144,7 +144,6 @@ module Dependabot
 
       def fetch_root_manifest_files
         raise Dependabot::ManifestFileNotFound unless package_json || rush_json
-
         [package_json, rush_json].compact
       end
 
@@ -163,13 +162,13 @@ module Dependabot
       def path_dependencies(fetched_files)
         package_json_files = []
         unfetchable_deps = []
-
         path_dependency_details(fetched_files).each do |name, path|
           path = path.gsub(PATH_DEPENDENCY_CLEAN_REGEX, "")
           filename = path
+
           # NPM/Yarn support loading path dependencies from tarballs:
           # https://docs.npmjs.com/cli/pack.html
-          filename = File.join(filename, "package.json") unless filename.end_with?(".tgz")
+          filename = File.join(filename, "package.json") unless filename.end_with?(".tgz") or filename.end_with?(".tar")
           cleaned_name = Pathname.new(filename).cleanpath.to_path
           next if fetched_files.map(&:name).include?(cleaned_name)
 
@@ -178,7 +177,7 @@ module Dependabot
             package_json_files << file
           rescue Dependabot::DependencyFileNotFound
             # Unfetchable tarballs should not be re-fetched as a package
-            unfetchable_deps << [name, path] unless path.end_with?(".tgz")
+            unfetchable_deps << [name, path] unless path.end_with?(".tgz") or path.end_with?(".tar")
           end
         end
 
@@ -228,7 +227,6 @@ module Dependabot
         # Fetch yarn "file:" path "resolutions" so the lockfile can be resolved
         resolution_objects = parsed_manifest.values_at("resolutions").compact
         manifest_objects = dependency_objects + resolution_objects
-
         raise Dependabot::DependencyFileNotParseable, file.path unless manifest_objects.all? { |o| o.is_a?(Hash) }
 
         resolution_deps = resolution_objects.flat_map(&:to_a).
