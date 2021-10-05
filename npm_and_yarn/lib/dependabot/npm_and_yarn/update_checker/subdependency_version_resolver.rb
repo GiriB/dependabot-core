@@ -90,7 +90,7 @@ module Dependabot
             Dir.chdir(path) do
               SharedHelpers.run_helper_subprocess(
                 command: NativeHelpers.helper_path,
-                function: "yarn:updateSubdependency",
+                function: "midgard-yarn:updateSubdependency",
                 args: [Dir.pwd, lockfile_name]
               )
             end

@@ -218,11 +218,13 @@ module Dependabot
 
               SharedHelpers.run_helper_subprocess(
                 command: NativeHelpers.helper_path,
-                function: "yarn:parseLockfile",
+                function: "midgard-yarn:parseLockfile",
                 args: [Dir.pwd]
               )
             rescue SharedHelpers::HelperSubprocessFailed
-              raise Dependabot::DependencyFileNotParseable, yarn_lock.path
+              puts e.message
+              puts e.error_context
+              raise Dependabot::DependencyFileNotParseable, e.message, e.error_context
             end
         end
 

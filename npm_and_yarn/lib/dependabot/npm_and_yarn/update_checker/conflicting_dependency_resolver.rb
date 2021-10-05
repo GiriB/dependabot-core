@@ -53,7 +53,7 @@ module Dependabot
             else
               SharedHelpers.run_helper_subprocess(
                 command: NativeHelpers.helper_path,
-                function: "yarn:findConflictingDependencies",
+                function: "midgard-yarn:findConflictingDependencies",
                 args: [Dir.pwd, dependency.name, target_version.to_s]
               )
             end

@@ -134,7 +134,7 @@ module Dependabot
         def run_yarn_top_level_updater(top_level_dependency_updates:)
           SharedHelpers.run_helper_subprocess(
             command: NativeHelpers.helper_path,
-            function: "yarn:update",
+            function: "midgard-yarn:update",
             args: [
               Dir.pwd,
               top_level_dependency_updates
@@ -145,7 +145,7 @@ module Dependabot
         def run_yarn_subdependency_updater(lockfile_name:)
           SharedHelpers.run_helper_subprocess(
             command: NativeHelpers.helper_path,
-            function: "yarn:updateSubdependency",
+            function: "midgard-yarn:updateSubdependency",
             args: [Dir.pwd, lockfile_name, sub_dependencies.first.to_h]
           )
         end
@@ -290,12 +290,16 @@ module Dependabot
             path = file.name
             FileUtils.mkdir_p(Pathname.new(path).dirname)
 
+            start = Time.now
             updated_content =
               if update_package_json && top_level_dependencies.any?
                 updated_package_json_content(file)
               else
                 file.content
               end
+
+            timetaken = Time.now - start
+            puts "place 2 Time taken: ",timetaken
 
             updated_content = replace_ssh_sources(updated_content)
 

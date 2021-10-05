@@ -413,7 +413,7 @@ module Dependabot
             Dir.chdir(path) do
               SharedHelpers.run_helper_subprocess(
                 command: NativeHelpers.helper_path,
-                function: "yarn:checkPeerDependencies",
+                function: "midgard-yarn:checkPeerDependencies",
                 args: [
                   Dir.pwd,
                   dependency.name,
