@@ -1,10 +1,6 @@
-<<<<<<< HEAD
 #!/bin/bash
 
 set -e
-=======
-#!/bin/sh -e
->>>>>>> a7b70eef9 (Merge main from dependabot/dependabot-core (#277))
 
 bundle install
 bundle exec rubocop .
