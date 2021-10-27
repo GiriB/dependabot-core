@@ -81,6 +81,16 @@ module Dependabot
           labeler.labels_for_pr,
           work_item
         )
+      rescue *Clients::Azure::TagsCreationForbidden
+        # If the user doesn't have permissions to create tags, create PR without labels
+        azure_client_for_source.create_pull_request(
+          pr_name,
+          branch_name,
+          source.branch || default_branch,
+          pr_description,
+          [],
+          work_item
+        )
       end
 
       def default_branch

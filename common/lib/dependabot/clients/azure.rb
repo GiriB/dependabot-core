@@ -18,6 +18,8 @@ module Dependabot
 
       class Forbidden < StandardError; end
 
+      class TagsCreationForbidden < StandardError; end
+
       RETRYABLE_ERRORS = [InternalServerError, BadGateway, ServiceNotAvailable].freeze
 
       MAX_PR_DESCRIPTION_LENGTH = 3999
@@ -265,7 +267,10 @@ module Dependabot
         end
 
         raise Unauthorized if response.status == 401
-        raise Forbidden if response.status == 403
+        if response.status == 403
+          raise TagsCreationForbidden if tags_creation_forbidden?(response)
+          raise Forbidden
+        end
         raise NotFound if response.status == 404
 
         response
@@ -325,6 +330,11 @@ module Dependabot
         end
         pr_description.force_encoding(Encoding::UTF_8)
       end
+
+      def tags_creation_forbidden?(response)
+        JSON.parse(response.body).fetch('message', nil)
+        .include?("TF401289: The current user does not have permissions to create tags")
+      end 
 
       attr_reader :auth_header
       attr_reader :credentials
