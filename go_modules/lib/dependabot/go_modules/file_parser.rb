@@ -176,8 +176,6 @@ module Dependabot
           false
         end
       end
-<<<<<<< HEAD
-=======
 
       def dependency_is_replaced(details)
         # Mark dependency as replaced if the requested dependency has a
@@ -196,7 +194,6 @@ module Dependabot
         end
         false
       end
->>>>>>> 35032ea1459b48e93dea8c9d6b0c3f7417dce014
     end
   end
 end
