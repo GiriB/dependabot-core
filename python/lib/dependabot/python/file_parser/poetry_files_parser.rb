@@ -43,7 +43,6 @@ module Dependabot
 
             deps_hash.each do |name, req|
               next if normalise(name) == "python"
-<<<<<<< HEAD
 
               requirements = parse_requirements_from(req, type)
               next if requirements.empty?
@@ -54,24 +53,6 @@ module Dependabot
                 requirements: requirements,
                 package_manager: "pip"
               )
-=======
-              next if req.is_a?(Hash) && UNSUPPORTED_DEPENDENCY_TYPES.any? { |t| req.key?(t) }
-
-              check_requirements(req)
-
-              dependencies <<
-                Dependency.new(
-                  name: normalise(name),
-                  version: version_from_lockfile(name),
-                  requirements: [{
-                    requirement: req.is_a?(String) ? req : req["version"],
-                    file: pyproject.name,
-                    source: nil,
-                    groups: [type]
-                  }],
-                  package_manager: "pip"
-                )
->>>>>>> azure_changes
             end
           end
 
