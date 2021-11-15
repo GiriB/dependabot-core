@@ -116,7 +116,6 @@ module Dependabot
             handle_parser_error(path, stderr) unless status.success?
 
             JSON.parse(stdout)
-
           end
       end
 

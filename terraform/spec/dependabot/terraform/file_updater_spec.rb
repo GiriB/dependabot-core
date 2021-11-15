@@ -322,8 +322,7 @@ RSpec.describe Dependabot::Terraform::FileUpdater do
                 source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.4.1"
             DEP
           )
-        ]
-      end
+        end
 
         it "doesn't update the duplicate" do
           updated_file = subject.find { |file| file.name == "main.tf" }
@@ -436,7 +435,7 @@ RSpec.describe Dependabot::Terraform::FileUpdater do
                 version = "0.3.1"
             DEP
           )
-        ]
+        end
       end
 
       context "with an hcl2-based registry dependency" do
