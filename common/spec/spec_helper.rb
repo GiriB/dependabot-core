@@ -36,6 +36,7 @@ RSpec.configure do |config|
   config.color = true
   config.order = :rand
   config.mock_with(:rspec) { |mocks| mocks.verify_partial_doubles = true }
+  config.warnings = false
   # config.raise_errors_for_deprecations!
 
   config.around do |example|
