@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "commonmarker", ">= 0.20.1", "< 0.24.0"
   spec.add_dependency "docker_registry2", "~> 1.7", ">= 1.7.1"
   spec.add_dependency "excon", "~> 0.75"
+  spec.add_dependency "warning", "<= 1.2.1"
   # Skipping faraday pinning version, as azure gem needs faraday at <1.0.0. 
   # TODO: Fix dependency with azure gem & Uncomment below
   # spec.add_dependency "faraday", "1.7.0"
