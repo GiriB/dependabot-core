@@ -12,6 +12,10 @@ require "uri"
 require "dependabot/dependency_file"
 require_relative "dummy_package_manager/dummy"
 require_relative "warning_monkey_patch"
+require 'warning'
+Gem.path.each do |path|
+  Warning.ignore(//, path)
+end
 
 if ENV["COVERAGE"]
   SimpleCov::Formatter::Console.output_style = "block"
@@ -36,7 +40,7 @@ RSpec.configure do |config|
   config.color = true
   config.order = :rand
   config.mock_with(:rspec) { |mocks| mocks.verify_partial_doubles = true }
-  # config.raise_errors_for_deprecations!
+  config.raise_errors_for_deprecations!
 
   config.around do |example|
     if example.metadata[:profile]
