@@ -12,10 +12,6 @@ require "uri"
 require "dependabot/dependency_file"
 require_relative "dummy_package_manager/dummy"
 require_relative "warning_monkey_patch"
-require "warning"
-Gem.path.each do |path|
-  Warning.ignore(//, path)
-end
 
 if ENV["COVERAGE"]
   SimpleCov::Formatter::Console.output_style = "block"
