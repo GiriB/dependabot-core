@@ -361,13 +361,26 @@ module Dependabot
           else [] # Invalid lerna.json, which must not be in use
           end
 
-        paths_array.flat_map do |path|
-          # The packages/!(not-this-package) syntax is unique to Yarn
-          if path.include?("*") || path.include?("!(")
-            expanded_paths(path)
-          else path
-          end
+      
+        workspace_directories = []
+        code_paths = fetch_code_paths_for_search_text(search_text: "package.json")
+        
+        for code_path in code_paths
+          next unless code_path.end_with?("/package.json") || !paths_array.any? { |path| File.fnmatch?(path, code_path)}
+          directory_path = code_path.chomp("/package.json")[1..-1]
+          workspace_directories.append(directory_path)
         end
+
+        workspace_directories
+
+
+        #paths_array.flat_map do |path|
+          # The packages/!(not-this-package) syntax is unique to Yarn
+          #if path.include?("*") || path.include?("!(")
+            #expanded_paths(path)
+          #else path
+          #end
+        #end
       end
 
       # Only expands globs one level deep, so path/**/* gets expanded to path/

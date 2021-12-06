@@ -153,6 +153,10 @@ module Dependabot
         raise Dependabot::DependencyFileNotFound, path
       end
 
+      def fetch_code_paths_for_search_text(search_text:)
+        azure_client.fetch_code_paths_for_search_text(search_text: search_text)
+      end
+
       def repo_contents(dir: ".", ignore_base_directory: false,
                         raise_errors: true, fetch_submodules: false)
         dir = File.join(directory, dir) unless ignore_base_directory

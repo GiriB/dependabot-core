@@ -140,6 +140,51 @@ module Dependabot
         JSON.parse(response.body).fetch("value")
       end
 
+      def fetch_code_paths_for_search_text(search_text:)
+        code_paths = []
+        skip = 0
+        top = 1000
+
+        while true
+          content = {
+            searchText: search_text,
+            "$skip": skip,
+            "$top": top,
+            filters: {
+              Project: [
+                "Outlook Web"
+              ],
+              Repository: [
+                source.unscoped_repo
+              ],
+              Branch: [
+                "master"
+              ]
+            } 
+          }
+
+          response = post("https://almsearch.dev.azure.com/" + 
+            source.organization + "/" + source.project + 
+            "/_apis/search/codesearchresults?api-version=6.0-preview.1", content.to_json)
+          
+          response_json = JSON.parse(response.body)
+
+          count = response_json.fetch("count").to_i
+
+          results = response_json.fetch("results")
+
+          for result in results
+            code_paths.append(result.fetch("path"))
+          end
+
+          break if count <= skip + top
+
+          skip += top
+        end
+
+        code_paths
+      end
+
       def create_commit(branch_name, base_commit, commit_message, files,
                         author_details)
         content = {
