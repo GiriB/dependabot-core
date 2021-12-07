@@ -366,8 +366,9 @@ module Dependabot
         code_paths = fetch_code_paths_for_search_text(search_text: "package.json")
         
         for code_path in code_paths
-          next unless code_path.end_with?("/package.json") || !paths_array.any? { |path| File.fnmatch?(path, code_path)}
-          directory_path = code_path.chomp("/package.json")[1..-1]
+          p = code_path[1..-1]
+          next unless p.end_with?("/package.json") && paths_array.any? { |path| File.fnmatch?(path, p)}
+          directory_path = p.chomp("/package.json")
           workspace_directories.append(directory_path)
         end
 
