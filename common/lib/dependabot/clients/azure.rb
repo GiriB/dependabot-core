@@ -145,7 +145,7 @@ module Dependabot
         skip = 0
         top = 1000
 
-        while true
+        loop do
           content = {
             searchText: search_text,
             "$skip": skip,
@@ -160,20 +160,20 @@ module Dependabot
               Branch: [
                 "master"
               ]
-            } 
+            }
           }
 
-          response = post("https://almsearch.dev.azure.com/" + 
-            source.organization + "/" + source.project + 
+          response = post("https://almsearch.dev.azure.com/" +
+            source.organization + "/" + source.project +
             "/_apis/search/codesearchresults?api-version=6.0-preview.1", content.to_json)
-          
+
           response_json = JSON.parse(response.body)
 
           count = response_json.fetch("count").to_i
 
           results = response_json.fetch("results")
 
-          for result in results
+          results.each do |result|
             code_paths.append(result.fetch("path"))
           end
 
