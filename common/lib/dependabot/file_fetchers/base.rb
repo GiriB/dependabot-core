@@ -157,7 +157,7 @@ module Dependabot
         case source.provider
         when "azure"
           azure_client.fetch_repo_paths_for_code_search(search_text)
-        else raise "Code search currently not support for provider: '#{source.provider}'."
+        else []
         end
       end
 

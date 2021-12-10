@@ -370,7 +370,6 @@ module Dependabot
           ignored_paths = ignored_workspace_paths(paths_array)
 
           package_json_paths = fetch_all_package_jsons_repo_paths
-
           dir = directory.gsub(%r{(^/|/$)}, "")
 
           package_json_paths.each do |package_json_path|
@@ -384,11 +383,10 @@ module Dependabot
             next unless paths_array.any? { |path| !path.include?("!(") && File.fnmatch?(path, package_json_path) } && ignored_paths.none? { |path| File.fnmatch?(path, package_json_path)}
 
             # Since we want only the directory path, remove package.json from the package_json_path
-            workspace_directory_path = package_json_path.chomp("/package.json")
-            workspace_directories.append(workspace_directory_path)
+            workspace_directories.append(package_json_path.chomp("/package.json"))
           end
 
-          return workspace_directories
+          return workspace_directories unless workspace_directories.empty?
         end
 
         paths_array.flat_map do |path|
@@ -431,9 +429,11 @@ module Dependabot
 
           paths.each do |path|
             # Expands regex to add individual directory regexes
-            ignored_workspace_paths.append(path.gsub(/!\(.*?\)/, i))
+            ignored_workspace_paths.append(ignored_path.gsub(/!\(.*?\)/, path))
           end
         end
+
+        ignored_workspace_paths
       end
 
       def parsed_package_json
