@@ -153,8 +153,12 @@ module Dependabot
         raise Dependabot::DependencyFileNotFound, path
       end
 
-      def fetch_code_paths_for_search_text(search_text:)
-        azure_client.fetch_code_paths_for_search_text(search_text: search_text)
+      def fetch_repo_paths_for_code_search(search_text)
+        case source.provider
+        when "azure"
+          azure_client.fetch_repo_paths_for_code_search(search_text)
+        else raise "Code search currently not support for provider: '#{source.provider}'."
+        end
       end
 
       def repo_contents(dir: ".", ignore_base_directory: false,

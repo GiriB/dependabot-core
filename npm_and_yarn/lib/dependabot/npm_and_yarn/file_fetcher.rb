@@ -361,26 +361,44 @@ module Dependabot
           else [] # Invalid lerna.json, which must not be in use
           end
 
-        workspace_directories = []
-        code_paths = fetch_code_paths_for_search_text(search_text: "package.json")
+        # Since currently we don't have a local clone of the repo, it becomes difficult to fetch workspace packages with complex glob patterns like packages/**/*, */packages/**
+        # Hence, for complex glob patterns, the idea is to fetch all the package.json paths in the repo and then match if it belongs to any of the specified workspace glob patterns.
+        complex_glob_pattern_present = paths_array.any? { |globbed_path| globbed_path.include?("**") || globbed_path.include?("*/") }
+        if complex_glob_pattern_present
 
-        code_paths.each do |code_path|
-          p = code_path[1..-1]
-          next unless p.end_with?("/package.json") && paths_array.any? { |path| File.fnmatch?(path, p) }
+          workspace_directories = []
+          ignored_paths = ignored_workspace_paths(paths_array)
 
-          directory_path = p.chomp("/package.json")
-          workspace_directories.append(directory_path)
+          package_json_paths = fetch_all_package_jsons_repo_paths
+
+          dir = directory.gsub(%r{(^/|/$)}, "")
+
+          package_json_paths.each do |package_json_path|
+            # Check if the path starts with the source repo directory
+            is_workspace_package_json = package_json_path.scan(%r{^/?#{Regexp.escape(dir)}\//?}).any?
+
+            next unless is_workspace_package_json
+
+            package_json_path = package_json_path.gsub(%r{^/?#{Regexp.escape(dir)}/?}, "")
+            # If it does not match any of the specified workspaces or is an excluded workspace, skip that package path.
+            next unless paths_array.any? { |path| !path.include?("!(") && File.fnmatch?(path, package_json_path) } && ignored_paths.none? { |path| File.fnmatch?(path, package_json_path)}
+
+            # Since we want only the directory path, remove package.json from the package_json_path
+            workspace_directory_path = package_json_path.chomp("/package.json")
+            workspace_directories.append(workspace_directory_path)
+          end
+
+          return workspace_directories
         end
 
-        workspace_directories
-
-        # paths_array.flat_map do |path|
-        # The packages/!(not-this-package) syntax is unique to Yarn
-        # if path.include?("*") || path.include?("!(")
-        # expanded_paths(path)
-        # else path
-        # end
-        # end
+        paths_array.flat_map do |path|
+          #The packages/!(not-this-package) syntax is unique to Yarn
+          if path.include?("*") || path.include?("!(")
+            expanded_paths(path)
+          else
+            path
+          end
+        end
       end
 
       # Only expands globs one level deep, so path/**/* gets expanded to path/
@@ -397,6 +415,25 @@ module Dependabot
           map { |f| f.path.gsub(%r{^/?#{Regexp.escape(dir)}/?}, "") }.
           select { |filename| File.fnmatch?(path, filename) }.
           reject { |fn| ignored_paths.any? { |p| fn.include?(p) } }
+      end
+
+      def fetch_all_package_jsons_repo_paths
+        fetch_repo_paths_for_code_search("package.json").filter{|repo_path| repo_path.end_with?("/package.json")}
+      end
+
+      def ignored_workspace_paths(workspace_paths)
+        #The packages/!(not-this-package) syntax is used to specify workspace exclusions
+        ignored_paths_array = workspace_paths.filter {|path| path.include?("!(")}
+
+        ignored_workspace_paths = []
+        ignored_paths_array.each do |ignored_path|
+          paths = ignored_path.scan(/!\((.*?)\)/).flatten
+
+          paths.each do |path|
+            # Expands regex to add individual directory regexes
+            ignored_workspace_paths.append(path.gsub(/!\(.*?\)/, i))
+          end
+        end
       end
 
       def parsed_package_json
