@@ -369,16 +369,9 @@ module Dependabot
           workspace_directories = []
           ignored_paths = ignored_workspace_paths(paths_array)
 
-          package_json_paths = fetch_all_package_jsons_repo_paths
-          dir = directory.gsub(%r{(^/|/$)}, "")
+          package_json_paths = fetch_all_workspace_package_jsons_repo_paths
 
           package_json_paths.each do |package_json_path|
-            # Check if the path starts with the source repo directory
-            is_workspace_package_json = package_json_path.scan(%r{^/?#{Regexp.escape(dir)}\//?}).any?
-
-            next unless is_workspace_package_json
-
-            package_json_path = package_json_path.gsub(%r{^/?#{Regexp.escape(dir)}/?}, "")
             # If it does not match any of the specified workspaces or is an excluded workspace, skip that package path.
             next unless paths_array.any? { |path| !path.include?("!(") && File.fnmatch?(path, package_json_path) } && ignored_paths.none? { |path| File.fnmatch?(path, package_json_path)}
 
@@ -415,8 +408,14 @@ module Dependabot
           reject { |fn| ignored_paths.any? { |p| fn.include?(p) } }
       end
 
-      def fetch_all_package_jsons_repo_paths
-        fetch_repo_paths_for_code_search("package.json").filter{|repo_path| repo_path.end_with?("/package.json")}
+      def fetch_all_workspace_package_jsons_repo_paths
+        dir = directory.gsub(%r{(^/|/$)}, "")
+
+        fetch_repo_paths_for_code_search("package.json")
+          # Check if the path is for a package.json file and starts with the source repo directory
+          .filter{|repo_path| repo_path.end_with?("/package.json") && repo_path.scan(%r{^/?#{Regexp.escape(dir)}\//?}).any?}
+          # Return path relative to repo source directory
+          .map {|package_json_path| package_json_path.gsub(%r{^/?#{Regexp.escape(dir)}/?}, "")}
       end
 
       def ignored_workspace_paths(workspace_paths)
