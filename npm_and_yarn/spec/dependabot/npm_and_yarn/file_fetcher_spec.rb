@@ -1243,15 +1243,15 @@ RSpec.describe Dependabot::NpmAndYarn::FileFetcher do
       end
 
       context "specified using complex glob pattern like packages/**/*" do
-        let(:package_json_code_search_results) {
+        let(:package_json_code_search_results) do
           [
-            '/packages/folderA/subfolderA/packageA/package.json',
-            '/packages/folderA/subfolderB/packageA/package.json',
-            '/packages/folderB/subfolderA/packageA/package1.json',
-            '/paster/folderA/subfolderA/packageA/package.json',
-            '/packages1/folderA/subfolderA/packageA/package2.json'
+            "/packages/folderA/subfolderA/packageA/package.json",
+            "/packages/folderA/subfolderB/packageA/package.json",
+            "/packages/folderB/subfolderA/packageA/package1.json",
+            "/paster/folderA/subfolderA/packageA/package.json",
+            "/packages1/folderA/subfolderA/packageA/package2.json"
           ]
-        }
+        end
 
         before do
           stub_request(:get, File.join(url, "package.json?ref=sha")).
@@ -1263,27 +1263,28 @@ RSpec.describe Dependabot::NpmAndYarn::FileFetcher do
               headers: json_header
             )
 
-            stub_request(
-              :get,
-              File.join(url, "packages/folderA/subfolderA/packageA/package.json?ref=sha")
-            ).with(headers: { "Authorization" => "token token" }).
-              to_return(
-                status: 200,
-                body: fixture("github", "package_json_content.json"),
-                headers: json_header
-              )
+          stub_request(
+            :get,
+            File.join(url, "packages/folderA/subfolderA/packageA/package.json?ref=sha")
+          ).with(headers: { "Authorization" => "token token" }).
+            to_return(
+              status: 200,
+              body: fixture("github", "package_json_content.json"),
+              headers: json_header
+            )
 
-            stub_request(
-              :get,
-              File.join(url, "packages/folderA/subfolderB/packageA/package.json?ref=sha")
-            ).with(headers: { "Authorization" => "token token" }).
-              to_return(
-                status: 200,
-                body: fixture("github", "package_json_content.json"),
-                headers: json_header
-              )
+          stub_request(
+            :get,
+            File.join(url, "packages/folderA/subfolderB/packageA/package.json?ref=sha")
+          ).with(headers: { "Authorization" => "token token" }).
+            to_return(
+              status: 200,
+              body: fixture("github", "package_json_content.json"),
+              headers: json_header
+            )
 
-          allow(file_fetcher_instance).to receive(:fetch_repo_paths_for_code_search).with('package.json').and_return(package_json_code_search_results)
+          allow(file_fetcher_instance).to receive(:fetch_repo_paths_for_code_search).with("package.json",
+                                                                                          source.directory).and_return(package_json_code_search_results)
         end
 
         it "fetches package.json from the workspace dependencies" do
@@ -1309,7 +1310,7 @@ RSpec.describe Dependabot::NpmAndYarn::FileFetcher do
             )
           expect(file_fetcher_instance.files.count).to eq(3)
           expect(file_fetcher_instance.files.map(&:name)).
-          not_to include("packages/folderA/subfolderB/packageA/package.json")
+            not_to include("packages/folderA/subfolderB/packageA/package.json")
         end
 
         it "tries to package.json from condensed glob pattern in case no workspace paths are detected via code search" do
@@ -1321,7 +1322,8 @@ RSpec.describe Dependabot::NpmAndYarn::FileFetcher do
               headers: json_header
             )
 
-          allow(file_fetcher_instance).to receive(:fetch_repo_paths_for_code_search).with('package.json').and_return([])
+          allow(file_fetcher_instance).to receive(:fetch_repo_paths_for_code_search).with("package.json",
+                                                                                          source.directory).and_return([])
 
           expect(file_fetcher_instance.files.map(&:name)).
             to match_array(

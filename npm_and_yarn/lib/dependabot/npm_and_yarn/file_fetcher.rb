@@ -411,9 +411,9 @@ module Dependabot
       def fetch_all_workspace_package_jsons_repo_paths
         dir = directory.gsub(%r{(^/|/$)}, "")
 
-        fetch_repo_paths_for_code_search("package.json")
+        fetch_repo_paths_for_code_search("package.json", directory)
           # Check if the path is for a package.json file and starts with the source repo directory
-          .filter{|repo_path| repo_path.end_with?("/package.json") && repo_path.scan(%r{^/?#{Regexp.escape(dir)}\//?}).any?}
+          .filter{|repo_path| repo_path.end_with?("/package.json")}
           # Return path relative to repo source directory
           .map {|package_json_path| package_json_path.gsub(%r{^/?#{Regexp.escape(dir)}/?}, "")}
       end

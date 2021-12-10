@@ -141,7 +141,7 @@ module Dependabot
         JSON.parse(response.body).fetch("value")
       end
 
-      def fetch_repo_paths_for_code_search(search_text)
+      def fetch_repo_paths_for_code_search(search_text, directory)
         code_paths = []
         current_page_number = 1
         page_limit = 1000
@@ -162,7 +162,7 @@ module Dependabot
                 source.unscoped_repo
               ],
               Path: [
-                source.directory
+                directory
               ],
               Branch: [
                 source.branch

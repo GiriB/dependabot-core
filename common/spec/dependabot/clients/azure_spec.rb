@@ -302,7 +302,7 @@ RSpec.describe Dependabot::Clients::Azure do
   end
 
   describe "#code_search" do
-    subject(:code_search) { client.fetch_repo_paths_for_code_search(search_text) }
+    subject(:code_search) { client.fetch_repo_paths_for_code_search(search_text, source.directory) }
 
     let(:source) {Dependabot::Source.new(provider: 'azure', repo: 'org/project/_git/repo', branch: 'main', directory: 'src')}
     let(:code_search_url) { "https://almsearch.dev.azure.com/" + source.organization + "/" + source.project + "/_apis/search/codesearchresults?api-version=6.0"}
