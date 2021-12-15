@@ -143,8 +143,7 @@ module Dependabot
 
       def fetch_repo_paths_for_code_search(search_text, directory)
         code_paths = []
-        current_page_number = 1
-        page_limit = 1000
+        current_page_number = 1, page_limit = 1000
 
         # API documentation link: https://docs.microsoft.com/en-us/rest/api/azure/devops/search/code-search-results/fetch-code-search-results?view=azure-devops-rest-6.0
         # This is a paginated API with page limit of 1000 records

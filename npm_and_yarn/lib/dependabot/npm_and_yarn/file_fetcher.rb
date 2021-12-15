@@ -7,6 +7,7 @@ require "dependabot/npm_and_yarn/file_parser"
 
 module Dependabot
   module NpmAndYarn
+    # rubocop:disable Metrics/ClassLength
     class FileFetcher < Dependabot::FileFetchers::Base
       require_relative "file_fetcher/path_dependency_builder"
 
@@ -341,8 +342,6 @@ module Dependabot
       end
 
       def fetch_rush_packages_from_path(path, _nested = false)
-        puts "Fetching rush package Path: #{path}"
-
         dependency_files = []
         package_json_path = File.join(path, "package.json")
 
@@ -353,6 +352,7 @@ module Dependabot
         dependency_files
       end
 
+      # rubocop:disable Metrics/PerceivedComplexity
       def workspace_paths(workspace_object)
         paths_array =
           if workspace_object.is_a?(Hash)
@@ -361,30 +361,16 @@ module Dependabot
           else [] # Invalid lerna.json, which must not be in use
           end
 
-        # Since currently we don't have a local clone of the repo, it becomes difficult to fetch workspace packages with complex glob patterns like packages/**/*, */packages/**
-        # Hence, for complex glob patterns, the idea is to fetch all the package.json paths in the repo and then match if it belongs to any of the specified workspace glob patterns.
+        # Currently, for complex glob patterns like packages/**/*, */packages/**,
+        # it is difficult to fetch workspace packages without local repo clone,
+        # Hence, the idea is to fetch all the package.json paths in the repo and then
+        # match it with the specified workspace glob patterns.
         complex_glob_pattern_present = paths_array.any? do |globbed_path|
           globbed_path.include?("**") || globbed_path.include?("*/")
         end
         if complex_glob_pattern_present
 
-          workspace_directories = []
-          ignored_paths = ignored_workspace_paths(paths_array)
-
-          package_json_paths = fetch_all_workspace_package_jsons_repo_paths
-
-          package_json_paths.each do |package_json_path|
-            # If it does not match any of the specified workspaces or is an excluded workspace, skip that package path.
-            next unless paths_array.any? do |path|
-                          !path.include?("!(") && File.fnmatch?(path, package_json_path)
-                        end && ignored_paths.none? do |path|
-                                 File.fnmatch?(path, package_json_path)
-                               end
-
-            # Since we want only the directory path, remove package.json from the package_json_path
-            workspace_directories.append(package_json_path.chomp("/package.json"))
-          end
-
+          workspace_directories = expanded_paths_for_complex_glob_patterns(paths_array)
           return workspace_directories unless workspace_directories.empty?
         end
 
@@ -397,6 +383,7 @@ module Dependabot
           end
         end
       end
+      # rubocop:enable Metrics/PerceivedComplexity
 
       # Only expands globs one level deep, so path/**/* gets expanded to path/
       def expanded_paths(path)
@@ -412,6 +399,23 @@ module Dependabot
           map { |f| f.path.gsub(%r{^/?#{Regexp.escape(dir)}/?}, "") }.
           select { |filename| File.fnmatch?(path, filename) }.
           reject { |fn| ignored_paths.any? { |p| fn.include?(p) } }
+      end
+
+      def expanded_paths_for_complex_glob_patterns(paths_array)
+        workspace_directories = []
+        ignored_paths = ignored_workspace_paths(paths_array)
+        package_json_paths = fetch_all_workspace_package_jsons_repo_paths
+
+        package_json_paths.each do |package_json_path|
+          # If it does not match any of the specified workspaces or is an excluded workspace, skip that package path.
+          next unless ignored_paths.none? { |ignored_path| File.fnmatch?(ignored_path, package_json_path) }
+          next unless paths_array.any? { |path| !path.include?("!(") && File.fnmatch?(path, package_json_path) }
+
+          # Since we want only the directory path, remove package.json from the package_json_path
+          workspace_directories.append(package_json_path.chomp("/package.json"))
+        end
+
+        workspace_directories
       end
 
       def fetch_all_workspace_package_jsons_repo_paths
@@ -431,7 +435,6 @@ module Dependabot
         ignored_workspace_paths = []
         ignored_paths_array.each do |ignored_path|
           paths = ignored_path.scan(/!\((.*?)\)/).flatten
-
           paths.each do |path|
             # Expands regex to add individual directory regexes
             ignored_workspace_paths.append(ignored_path.gsub(/!\(.*?\)/, path))
@@ -501,6 +504,7 @@ module Dependabot
         raise Dependabot::DependencyFileNotParseable, rush_json.path
       end
     end
+    # rubocop:enable Metrics/ClassLength
   end
 end
 

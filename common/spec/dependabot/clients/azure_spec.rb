@@ -308,7 +308,9 @@ RSpec.describe Dependabot::Clients::Azure do
       Dependabot::Source.new(provider: "azure", repo: "org/project/_git/repo", branch: "main", directory: "src")
     end
     let(:code_search_url) do
-      "https://almsearch.dev.azure.com/" + source.organization + "/" + source.project + "/_apis/search/codesearchresults?api-version=6.0"
+      "https://almsearch.dev.azure.com/" +
+        source.organization + "/" + source.project +
+        "/_apis/search/codesearchresults?api-version=6.0"
     end
     let(:search_text) { "package.json" }
     let(:results) do
@@ -324,12 +326,34 @@ RSpec.describe Dependabot::Clients::Azure do
         before do
           stub_request(:post, code_search_url).
             with(basic_auth: [username,
-                              password], body: { "searchText" => search_text, "$skip" => 0, "$top" => 1000, "filters" => { "Project" => [CGI.unescape(source.project)], "Repository" => [source.unscoped_repo], "Path" => [source.directory], "Branch" => [source.branch] } }.to_json).
+                              password],
+                 body: {
+                   "searchText" => search_text,
+                   "$skip" => 0,
+                   "$top" => 1000,
+                   "filters" => {
+                     "Project" => [CGI.unescape(source.project)],
+                     "Repository" => [source.unscoped_repo],
+                     "Path" => [source.directory],
+                     "Branch" => [source.branch]
+                   }
+                 }.to_json).
             to_return({ status: 200, body: { "count" => 1002, "results" => results[0, 2] }.to_json })
 
           stub_request(:post, code_search_url).
             with(basic_auth: [username,
-                              password], body: { "searchText" => search_text, "$skip" => 1000, "$top" => 1000, "filters" => { "Project" => [CGI.unescape(source.project)], "Repository" => [source.unscoped_repo], "Path" => [source.directory], "Branch" => [source.branch] } }.to_json).
+                              password],
+                 body: {
+                   "searchText" => search_text,
+                   "$skip" => 1000,
+                   "$top" => 1000,
+                   "filters" => {
+                     "Project" => [CGI.unescape(source.project)],
+                     "Repository" => [source.unscoped_repo],
+                     "Path" => [source.directory],
+                     "Branch" => [source.branch]
+                   }
+                 }.to_json).
             to_return({ status: 200, body: { "count" => 1002, "results" => results[2..-1] }.to_json })
         end
 
@@ -345,7 +369,18 @@ RSpec.describe Dependabot::Clients::Azure do
         before do
           stub_request(:post, code_search_url).
             with(basic_auth: [username,
-                              password], body: { "searchText" => search_text, "$skip" => 0, "$top" => 1000, "filters" => { "Project" => [CGI.unescape(source.project)], "Repository" => [source.unscoped_repo], "Path" => [source.directory], "Branch" => [source.branch] } }.to_json).
+                              password],
+                 body: {
+                   "searchText" => search_text,
+                   "$skip" => 0,
+                   "$top" => 1000,
+                   "filters" => {
+                     "Project" => [CGI.unescape(source.project)],
+                     "Repository" => [source.unscoped_repo],
+                     "Path" => [source.directory],
+                     "Branch" => [source.branch]
+                   }
+                 }.to_json).
             to_return({ status: 200, body: { "count" => 3, "results" => results }.to_json })
         end
 
@@ -361,7 +396,18 @@ RSpec.describe Dependabot::Clients::Azure do
         before do
           stub_request(:post, code_search_url).
             with(basic_auth: [username,
-                              password], body: { "searchText" => search_text, "$skip" => 0, "$top" => 1000, "filters" => { "Project" => [CGI.unescape(source.project)], "Repository" => [source.unscoped_repo], "Path" => [source.directory], "Branch" => [source.branch] } }.to_json).
+                              password],
+                 body: {
+                   "searchText" => search_text,
+                   "$skip" => 0,
+                   "$top" => 1000,
+                   "filters" => {
+                     "Project" => [CGI.unescape(source.project)],
+                     "Repository" => [source.unscoped_repo],
+                     "Path" => [source.directory],
+                     "Branch" => [source.branch]
+                   }
+                 }.to_json).
             to_return({ status: 200, body: { "count" => 0, "results" => [] }.to_json })
         end
 

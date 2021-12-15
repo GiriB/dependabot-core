@@ -1283,8 +1283,9 @@ RSpec.describe Dependabot::NpmAndYarn::FileFetcher do
               headers: json_header
             )
 
-          allow(file_fetcher_instance).to receive(:fetch_repo_paths_for_code_search).with("package.json",
-                                                                                          source.directory).and_return(package_json_code_search_results)
+          allow(file_fetcher_instance).to receive(:fetch_repo_paths_for_code_search).
+            with("package.json", source.directory).
+            and_return(package_json_code_search_results)
         end
 
         it "fetches package.json from the workspace dependencies" do
@@ -1313,7 +1314,7 @@ RSpec.describe Dependabot::NpmAndYarn::FileFetcher do
             not_to include("packages/folderA/subfolderB/packageA/package.json")
         end
 
-        it "tries to package.json from condensed glob pattern in case no workspace paths are detected via code search" do
+        it "tries to fetch package.json from condensed glob pattern in case no paths are detected via code search" do
           stub_request(:get, File.join(url, "packages?ref=sha")).
             with(headers: { "Authorization" => "token token" }).
             to_return(
@@ -1322,8 +1323,9 @@ RSpec.describe Dependabot::NpmAndYarn::FileFetcher do
               headers: json_header
             )
 
-          allow(file_fetcher_instance).to receive(:fetch_repo_paths_for_code_search).with("package.json",
-                                                                                          source.directory).and_return([])
+          allow(file_fetcher_instance).to receive(:fetch_repo_paths_for_code_search).
+            with("package.json", source.directory).
+            and_return([])
 
           expect(file_fetcher_instance.files.map(&:name)).
             to match_array(
