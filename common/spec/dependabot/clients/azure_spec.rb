@@ -304,30 +304,39 @@ RSpec.describe Dependabot::Clients::Azure do
   describe "#code_search" do
     subject(:code_search) { client.fetch_repo_paths_for_code_search(search_text, source.directory) }
 
-    let(:source) {Dependabot::Source.new(provider: 'azure', repo: 'org/project/_git/repo', branch: 'main', directory: 'src')}
-    let(:code_search_url) { "https://almsearch.dev.azure.com/" + source.organization + "/" + source.project + "/_apis/search/codesearchresults?api-version=6.0"}
-    let(:search_text) {'package.json'}
-    let(:results) {[{"path" => "/src/folderA/package.json"}, {"path" => "/src/folderB/package.json"}, {"path" => "/src/folderC/package.json"}]}
-    let(:expected_code_paths) { ["/src/folderA/package.json", "/src/folderB/package.json", "/src/folderC/package.json"] }
-
+    let(:source) do
+      Dependabot::Source.new(provider: "azure", repo: "org/project/_git/repo", branch: "main", directory: "src")
+    end
+    let(:code_search_url) do
+      "https://almsearch.dev.azure.com/" + source.organization + "/" + source.project + "/_apis/search/codesearchresults?api-version=6.0"
+    end
+    let(:search_text) { "package.json" }
+    let(:results) do
+      [{ "path" => "/src/folderA/package.json" }, { "path" => "/src/folderB/package.json" },
+       { "path" => "/src/folderC/package.json" }]
+    end
+    let(:expected_code_paths) do
+      ["/src/folderA/package.json", "/src/folderB/package.json", "/src/folderC/package.json"]
+    end
 
     context "when response code is 200" do
-
       context "when the API returns results in multiple pages" do
         before do
           stub_request(:post, code_search_url).
-            with(basic_auth: [username, password], body: { 'searchText' => search_text, "$skip" => 0, "$top" => 1000, "filters" => { "Project" => [ CGI.unescape(source.project)], "Repository" => [ source.unscoped_repo ], "Path" => [source.directory],"Branch" => [ source.branch ]}}.to_json).
-            to_return({status: 200, body: {"count" => 1002, "results" => results[0, 2]}.to_json})
+            with(basic_auth: [username,
+                              password], body: { "searchText" => search_text, "$skip" => 0, "$top" => 1000, "filters" => { "Project" => [CGI.unescape(source.project)], "Repository" => [source.unscoped_repo], "Path" => [source.directory], "Branch" => [source.branch] } }.to_json).
+            to_return({ status: 200, body: { "count" => 1002, "results" => results[0, 2] }.to_json })
 
           stub_request(:post, code_search_url).
-            with(basic_auth: [username, password], body: { 'searchText' => search_text, "$skip" => 1000, "$top" => 1000, "filters" => { "Project" => [ CGI.unescape(source.project)], "Repository" => [ source.unscoped_repo ], "Path" => [source.directory], "Branch" => [ source.branch ]}}.to_json).
-            to_return({status: 200, body: {"count" => 1002, "results" => results[2..-1]}.to_json})
+            with(basic_auth: [username,
+                              password], body: { "searchText" => search_text, "$skip" => 1000, "$top" => 1000, "filters" => { "Project" => [CGI.unescape(source.project)], "Repository" => [source.unscoped_repo], "Path" => [source.directory], "Branch" => [source.branch] } }.to_json).
+            to_return({ status: 200, body: { "count" => 1002, "results" => results[2..-1] }.to_json })
         end
 
         it "calls the code search API multiple times to get fetch all results and return the code paths" do
           code_paths = code_search
 
-          expect(WebMock).to (have_requested(:post, code_search_url).times(2))
+          expect(WebMock).to(have_requested(:post, code_search_url).times(2))
           expect(code_paths).to eq(expected_code_paths)
         end
       end
@@ -335,14 +344,15 @@ RSpec.describe Dependabot::Clients::Azure do
       context "when the API returns results in single page" do
         before do
           stub_request(:post, code_search_url).
-            with(basic_auth: [username, password], body: { 'searchText' => search_text, "$skip" => 0, "$top" => 1000, "filters" => { "Project" => [ CGI.unescape(source.project)], "Repository" => [ source.unscoped_repo ], "Path" => [source.directory], "Branch" => [ source.branch ]}}.to_json).
-            to_return({status: 200, body: {"count" => 3, "results" => results}.to_json})
+            with(basic_auth: [username,
+                              password], body: { "searchText" => search_text, "$skip" => 0, "$top" => 1000, "filters" => { "Project" => [CGI.unescape(source.project)], "Repository" => [source.unscoped_repo], "Path" => [source.directory], "Branch" => [source.branch] } }.to_json).
+            to_return({ status: 200, body: { "count" => 3, "results" => results }.to_json })
         end
 
         it "calls the code search API once to get all results and return the code paths" do
           code_paths = code_search
 
-          expect(WebMock).to (have_requested(:post, code_search_url).times(1))
+          expect(WebMock).to(have_requested(:post, code_search_url).times(1))
           expect(code_paths).to eq(expected_code_paths)
         end
       end
@@ -350,14 +360,15 @@ RSpec.describe Dependabot::Clients::Azure do
       context "when the API response contains number of results = 0" do
         before do
           stub_request(:post, code_search_url).
-            with(basic_auth: [username, password], body: { 'searchText' => search_text, "$skip" => 0, "$top" => 1000, "filters" => { "Project" => [ CGI.unescape(source.project)], "Repository" => [ source.unscoped_repo ], "Path" => [source.directory], "Branch" => [ source.branch ]}}.to_json).
-            to_return({status: 200, body: {"count" => 0, "results" => []}.to_json})
+            with(basic_auth: [username,
+                              password], body: { "searchText" => search_text, "$skip" => 0, "$top" => 1000, "filters" => { "Project" => [CGI.unescape(source.project)], "Repository" => [source.unscoped_repo], "Path" => [source.directory], "Branch" => [source.branch] } }.to_json).
+            to_return({ status: 200, body: { "count" => 0, "results" => [] }.to_json })
         end
 
         it "returns an empty array of code paths" do
           code_paths = code_search
 
-          expect(WebMock).to (have_requested(:post, code_search_url).times(1))
+          expect(WebMock).to(have_requested(:post, code_search_url).times(1))
           expect(code_paths).to be_empty
         end
       end

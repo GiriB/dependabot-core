@@ -183,6 +183,7 @@ module Dependabot
           end
 
           break if total_result_count <= current_page_number * page_limit
+
           current_page_number += 1
         end
 
