@@ -407,12 +407,18 @@ module Dependabot
         package_json_paths = fetch_all_workspace_package_jsons_repo_paths
 
         package_json_paths.each do |package_json_path|
-          # If it does not match any of the specified workspaces or is an excluded workspace, skip that package path.
-          next unless ignored_paths.none? { |ignored_path| File.fnmatch?(ignored_path, package_json_path) }
-          next unless paths_array.any? { |path| !path.include?("!(") && File.fnmatch?(path, package_json_path) }
-
           # Since we want only the directory path, remove package.json from the package_json_path
-          workspace_directories.append(package_json_path.chomp("/package.json"))
+          workspace_directory_path = package_json_path.chomp("/package.json")
+
+          # If it does not match any of the specified workspaces or is an excluded workspace, skip that workspace path.
+          next unless ignored_paths.none? do |ignored_path|
+                        File.fnmatch?(ignored_path, workspace_directory_path, File::FNM_PATHNAME)
+                      end
+          next unless paths_array.any? do |path|
+                        !path.include?("!(") && File.fnmatch?(path, workspace_directory_path, File::FNM_PATHNAME)
+                      end
+
+          workspace_directories.append(workspace_directory_path)
         end
 
         workspace_directories
