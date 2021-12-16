@@ -362,7 +362,8 @@ module Dependabot
           end
 
         # Currently, for complex glob patterns like packages/**/*, */packages/**,
-        # it is difficult to fetch workspace packages without local repo clone,
+        # it is not possible to fetch workspace packages without local repo clone,
+        # (See `expanded_paths` function declaration in this file for more details).
         # Hence, the idea is to fetch all the package.json paths in the repo and then
         # match it with the specified workspace glob patterns.
         complex_glob_pattern_present = paths_array.any? do |globbed_path|
@@ -411,9 +412,7 @@ module Dependabot
           workspace_directory_path = package_json_path.chomp("/package.json")
 
           # If it does not match any of the specified workspaces or is an excluded workspace, skip that workspace path.
-          next unless ignored_paths.none? do |ignored_path|
-                        File.fnmatch?(ignored_path, workspace_directory_path, File::FNM_PATHNAME)
-                      end
+          next unless ignored_paths.none? { |path| File.fnmatch?(path, workspace_directory_path, File::FNM_PATHNAME) }
           next unless paths_array.any? do |path|
                         !path.include?("!(") && File.fnmatch?(path, workspace_directory_path, File::FNM_PATHNAME)
                       end
