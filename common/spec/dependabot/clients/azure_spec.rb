@@ -305,8 +305,10 @@ RSpec.describe Dependabot::Clients::Azure do
     subject(:code_search) { client.fetch_repo_paths_for_code_search(search_text, source.directory) }
 
     let(:source) do
-      Dependabot::Source.new(provider: "azure", repo: "org/project/_git/repo", branch: "main", directory: "src")
+      Dependabot::Source.new(provider: "azure", repo: "org/project-id/_git/repo-id", branch: "main", directory: "src")
     end
+    let(:repo_name) { "repo" }
+    let(:project_name) { "project" }
     let(:code_search_url) do
       "https://almsearch.dev.azure.com/" +
         source.organization + "/" + source.project +
@@ -321,6 +323,16 @@ RSpec.describe Dependabot::Clients::Azure do
       ["/src/folderA/package.json", "/src/folderB/package.json", "/src/folderC/package.json"]
     end
 
+    before do
+      repository_details_fetch_url = source.api_endpoint +
+                                     source.organization + "/" + source.project +
+                                     "/_apis/git/repositories/" + source.unscoped_repo +
+                                     "?api-version=6.0"
+      stub_request(:get, repository_details_fetch_url).
+        with(basic_auth: [username, password]).
+        to_return({ status: 200, body: fixture("azure", "repository_details.json") })
+    end
+
     context "when response code is 200" do
       context "when the API returns results in multiple pages" do
         before do
@@ -332,8 +344,8 @@ RSpec.describe Dependabot::Clients::Azure do
                    "$skip" => 0,
                    "$top" => 1000,
                    "filters" => {
-                     "Project" => [CGI.unescape(source.project)],
-                     "Repository" => [source.unscoped_repo],
+                     "Project" => [CGI.unescape(project_name)],
+                     "Repository" => [CGI.unescape(repo_name)],
                      "Path" => [source.directory],
                      "Branch" => [source.branch]
                    }
@@ -348,8 +360,8 @@ RSpec.describe Dependabot::Clients::Azure do
                    "$skip" => 1000,
                    "$top" => 1000,
                    "filters" => {
-                     "Project" => [CGI.unescape(source.project)],
-                     "Repository" => [source.unscoped_repo],
+                     "Project" => [CGI.unescape(project_name)],
+                     "Repository" => [CGI.unescape(repo_name)],
                      "Path" => [source.directory],
                      "Branch" => [source.branch]
                    }
@@ -375,8 +387,8 @@ RSpec.describe Dependabot::Clients::Azure do
                    "$skip" => 0,
                    "$top" => 1000,
                    "filters" => {
-                     "Project" => [CGI.unescape(source.project)],
-                     "Repository" => [source.unscoped_repo],
+                     "Project" => [CGI.unescape(project_name)],
+                     "Repository" => [CGI.unescape(repo_name)],
                      "Path" => [source.directory],
                      "Branch" => [source.branch]
                    }
@@ -402,8 +414,8 @@ RSpec.describe Dependabot::Clients::Azure do
                    "$skip" => 0,
                    "$top" => 1000,
                    "filters" => {
-                     "Project" => [CGI.unescape(source.project)],
-                     "Repository" => [source.unscoped_repo],
+                     "Project" => [CGI.unescape(project_name)],
+                     "Repository" => [CGI.unescape(repo_name)],
                      "Path" => [source.directory],
                      "Branch" => [source.branch]
                    }
@@ -437,6 +449,62 @@ RSpec.describe Dependabot::Clients::Azure do
         stub_request(:post, code_search_url).
           with(basic_auth: [username, password]).
           to_return(status: 404)
+      end
+
+      it "raises a helpful error" do
+        expect { subject }.to raise_error(Dependabot::Clients::Azure::NotFound)
+      end
+    end
+  end
+
+  describe "#repository_details" do
+    subject(:repository_details) { client.repository_details }
+    let(:source) do
+      Dependabot::Source.new(provider: "azure", repo: "org/project/_git/repo", branch: "main", directory: "src")
+    end
+
+    let(:repository_details_fetch_url) do
+      source.api_endpoint +
+        source.organization + "/" + source.project +
+        "/_apis/git/repositories/" + source.unscoped_repo +
+        "?api-version=6.0"
+    end
+
+    context "when response code is 200" do
+      response_body = fixture("azure", "repository_details.json")
+
+      before do
+        stub_request(:get, repository_details_fetch_url).
+          with(basic_auth: [username, password]).
+          to_return({ status: 200, body: response_body })
+      end
+
+      it "returns the repo details" do
+        repo_details = repository_details
+
+        # Expect
+        expect(repo_details).not_to be_nil
+        expect(repo_details).to eq(JSON.parse(response_body))
+      end
+    end
+
+    context "when response code is 401" do
+      before do
+        stub_request(:get, repository_details_fetch_url).
+          with(basic_auth: [username, password]).
+          to_return({ status: 401 })
+      end
+
+      it "raises a helpful error" do
+        expect { subject }.to raise_error(Dependabot::Clients::Azure::Unauthorized)
+      end
+    end
+
+    context "when response code is 404" do
+      before do
+        stub_request(:get, repository_details_fetch_url).
+          with(basic_auth: [username, password]).
+          to_return({ status: 404 })
       end
 
       it "raises a helpful error" do
