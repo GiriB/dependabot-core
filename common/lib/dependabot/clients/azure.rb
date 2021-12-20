@@ -21,6 +21,8 @@ module Dependabot
 
       class TagsCreationForbidden < StandardError; end
 
+      class BadRequest < StandardError; end
+
       RETRYABLE_ERRORS = [InternalServerError, BadGateway, ServiceNotAvailable].freeze
 
       MAX_PR_DESCRIPTION_LENGTH = 3999
@@ -141,6 +143,7 @@ module Dependabot
         JSON.parse(response.body).fetch("value")
       end
 
+      # rubocop:disable Metrics/AbcSize
       def fetch_repo_paths_for_code_search(search_text, directory)
         code_paths = []
         current_page_number = 1
@@ -160,18 +163,10 @@ module Dependabot
             "$skip": (current_page_number - 1) * page_limit,
             "$top": page_limit,
             filters: {
-              Project: [
-                CGI.unescape(repo_project_name)
-              ],
-              Repository: [
-                CGI.unescape(repo_name)
-              ],
-              Path: [
-                directory
-              ],
-              Branch: [
-                source.branch
-              ]
+              Project: [CGI.unescape(repo_project_name)],
+              Repository: [CGI.unescape(repo_name)],
+              Path: [directory],
+              Branch: [source.branch]
             }
           }
 
@@ -179,6 +174,9 @@ module Dependabot
             "/_apis/search/codesearchresults?api-version=6.0", content.to_json)
 
           response_json = JSON.parse(response.body)
+
+          raise BadRequest, response_json.fetch("message") if response.status == 400
+
           total_result_count = response_json.fetch("count").to_i
           response_json.fetch("results").each { |result| code_paths.append(result.fetch("path")) }
 
@@ -189,6 +187,7 @@ module Dependabot
 
         code_paths
       end
+      # rubocop:enable Metrics/AbcSize
 
       def repository_details
         @repository_details ||=

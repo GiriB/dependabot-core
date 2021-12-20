@@ -432,6 +432,18 @@ RSpec.describe Dependabot::Clients::Azure do
       end
     end
 
+    context "when response is 400" do
+      before do
+        stub_request(:post, code_search_url).
+          with(basic_auth: [username, password]).
+          to_return(status: 400, body: { "message" => "Invalid Project" }.to_json)
+      end
+
+      it "raises a helpful error" do
+        expect { subject }.to raise_error(Dependabot::Clients::Azure::BadRequest, "Invalid Project")
+      end
+    end
+
     context "when response is 401" do
       before do
         stub_request(:post, code_search_url).
