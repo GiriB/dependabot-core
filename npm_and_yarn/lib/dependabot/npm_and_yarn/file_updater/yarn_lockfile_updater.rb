@@ -422,7 +422,7 @@ module Dependabot
 
           return if UpdateChecker::RegistryFinder.central_registry?(reg) && !package_name.start_with?("@")
 
-          raise PrivateSourceAuthenticationFailure, reg
+          raise PrivateSourceAuthenticationFailure, package_name
         end
 
         def raise_resolvability_error(error_message, yarn_lock)
