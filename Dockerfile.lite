@@ -76,6 +76,7 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
 # Copy src for only the gems we need.
 COPY npm_and_yarn/ /opt/npm_and_yarn/
 COPY common/ /opt/common
+COPY nuget/ /opt/nuget/
 
 ENV DEPENDABOT_NATIVE_HELPERS_PATH="/opt"
 
