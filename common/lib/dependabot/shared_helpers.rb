@@ -87,7 +87,7 @@ module Dependabot
       if ENV["DEBUG_FUNCTION"] == function
         puts helper_subprocess_bash_command(stdin_data: stdin_data, command: cmd, env: env)
         # Pause execution so we can run helpers inside the temporary directory
-        byebug # rubocop:disable Lint/Debugger
+        debugger # rubocop:disable Lint/Debugger
       end
 
       env_cmd = [env, cmd].compact
@@ -280,10 +280,10 @@ module Dependabot
       FileUtils.mv(backup_path, GIT_CONFIG_GLOBAL_PATH)
     end
 
-    def self.run_shell_command(command, allow_unsafe_shell_command: false)
+    def self.run_shell_command(command, allow_unsafe_shell_command: false, env: {})
       start = Time.now
       cmd = allow_unsafe_shell_command ? command : escape_command(command)
-      stdout, process = Open3.capture2e(cmd)
+      stdout, process = Open3.capture2e(env || {}, cmd)
       time_taken = Time.now - start
 
       # Raise an error with the output from the shell session if the
