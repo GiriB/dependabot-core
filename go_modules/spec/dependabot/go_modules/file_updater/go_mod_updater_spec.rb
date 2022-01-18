@@ -25,6 +25,8 @@ RSpec.describe Dependabot::GoModules::FileUpdater::GoModUpdater do
 
   let(:credentials) { [] }
 
+  let(:credentials) { [] }
+
   let(:dependency) do
     Dependabot::Dependency.new(
       name: dependency_name,

@@ -313,21 +313,6 @@ RSpec.describe Dependabot::Terraform::FileUpdater do
       context "with an hcl2-based git dependency" do
         let(:project_name) { "git_tags_012" }
 
-        it "doesn't update the duplicate" do
-          updated_file = subject.find { |file| file.name == "main.tf" }
-
-          expect(updated_file.content).to include(
-            <<~DEP
-              module "duplicate_label" {
-                source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.3.7"
-            DEP
-          )
-        end
-      end
-
-      context "with an hcl2-based git dependency" do
-        let(:files) { project_dependency_files("git_tags_012") }
-
         it "updates the requirement" do
           updated_file = subject.find { |file| file.name == "main.tf" }
 

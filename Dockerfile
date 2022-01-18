@@ -104,10 +104,6 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
   && npm install -g npm@v7.21.0 \
   && rm -rf ~/.npm
 
-# NOTE: This was a hack to get around the fact that elm 18 failed to install with
-# npm 7, we should look into installing the latest version of node + npm
-RUN npm install -g npm@v7.10.0
-
 
 ### ELM
 

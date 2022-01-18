@@ -56,6 +56,21 @@ following commands in the cloned Git repository:
 
 You can read more about this in the [Git for Windows wiki](https://github.com/git-for-windows/git/wiki/Git-cannot-create-a-file-or-directory-with-a-long-path).
 
+## Cloning the repository
+Clone the repository with Git using:
+
+```
+git clone https://github.com/dependabot/dependabot-core.git
+```
+
+On Windows this might fail with "Filename too long". To solve this, run the
+following commands in the cloned Git repository:
+
+1. `git config core.longpaths true`
+2. `git reset --hard`
+
+You can read more about this in the [Git for Windows wiki](https://github.com/git-for-windows/git/wiki/Git-cannot-create-a-file-or-directory-with-a-long-path).
+
 ## Setup
 
 To run all of Dependabot Core, you'll need Ruby, Python, PHP, Elixir, Node, Go,
