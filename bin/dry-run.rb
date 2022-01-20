@@ -119,7 +119,7 @@ $options = {
   security_advisories: [],
   security_updates_only: false,
   ignore_conditions: [],
-  pull_request: false
+  pull_request: false,
 }
 
 unless ENV["LOCAL_GITHUB_ACCESS_TOKEN"].to_s.strip.empty?

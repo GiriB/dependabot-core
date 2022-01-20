@@ -505,9 +505,15 @@ RSpec.describe Dependabot::NpmAndYarn::FileUpdater::NpmLockfileUpdater do
     subject { JSON.parse(updated_npm_lock_content) }
 
     let(:files) { project_dependency_files("npm6/ghpr_no_hash_pinning") }
+<<<<<<< HEAD
     let(:dependency_name) { "npm6-dependency" }
     let(:version) { "HEAD" }
     let(:previous_version) { "5d1be9ff4e12eb17c04591bba13aad6d71c86a1b" }
+=======
+    let(:dependency_name) { "discord.js" }
+    let(:version) { "HEAD" }
+    let(:previous_version) { "ab82cafcde0ee259a32ef14303c1b4a64dea8fae" }
+>>>>>>> azure_changes
     let(:requirements) do
       [{
         file: "package.json",
@@ -515,7 +521,11 @@ RSpec.describe Dependabot::NpmAndYarn::FileUpdater::NpmLockfileUpdater do
         groups: ["dependencies"],
         source: {
           type: "git",
+<<<<<<< HEAD
           url: "https://github.com/dependabot-fixtures/npm6-dependency",
+=======
+          url: "https://github.com/discordjs/discord.js",
+>>>>>>> azure_changes
           branch: nil,
           ref: "master"
         }
@@ -528,7 +538,11 @@ RSpec.describe Dependabot::NpmAndYarn::FileUpdater::NpmLockfileUpdater do
         groups: ["dependencies"],
         source: {
           type: "git",
+<<<<<<< HEAD
           url: "https://github.com/dependabot-fixtures/npm6-dependency",
+=======
+          url: "https://github.com/discordjs/discord.js",
+>>>>>>> azure_changes
           branch: nil,
           ref: "master"
         }
@@ -536,9 +550,14 @@ RSpec.describe Dependabot::NpmAndYarn::FileUpdater::NpmLockfileUpdater do
     end
 
     it "pins the version to a hash and ensures that the `from` field matches the original constraint" do
+<<<<<<< HEAD
       expect(subject["dependencies"]["npm6-dependency"]["version"]).
         to match(%r{github:dependabot-fixtures/npm6-dependency#[0-9a-z]{40}})
       expect(subject["dependencies"]["npm6-dependency"]["from"]).to eq("github:dependabot-fixtures/npm6-dependency")
+=======
+      expect(subject["dependencies"]["discord.js"]["version"]).to match(%r{github:discordjs/discord.js#[0-9a-z]{40}})
+      expect(subject["dependencies"]["discord.js"]["from"]).to eq("github:discordjs/discord.js")
+>>>>>>> azure_changes
     end
   end
 end

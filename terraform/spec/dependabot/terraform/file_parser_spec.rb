@@ -443,7 +443,6 @@ RSpec.describe Dependabot::Terraform::FileParser do
             }
           }])
         end
-      end
 
       before do
         stub_request(:get, "https://unknown-git-repo-example.com/status").to_return(
@@ -616,7 +615,6 @@ RSpec.describe Dependabot::Terraform::FileParser do
             }
           }])
         end
-      end
 
       context "with git@xxx.yy sources" do
         let(:files) { project_dependency_files("git_protocol") }

@@ -199,7 +199,11 @@ RSpec.describe Dependabot::Composer::FileUpdater::LockfileUpdater do
       it "raises a helpful error" do
         expect { updated_lockfile_content }.to raise_error do |error|
           expect(error.message).to include("Your requirements could not be resolved to an installable set of packages.")
+<<<<<<< HEAD
           expect(error.message).to include("requires composer-plugin-api ^1.0 -> found composer-plugin-api[2.2.0]")
+=======
+          expect(error.message).to include("requires composer-plugin-api ^1.0 -> found composer-plugin-api[2.1.0]")
+>>>>>>> azure_changes
           expect(error).to be_a Dependabot::DependencyFileNotResolvable
         end
       end

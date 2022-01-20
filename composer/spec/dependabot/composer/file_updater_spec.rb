@@ -146,7 +146,11 @@ RSpec.describe Dependabot::Composer::FileUpdater do
 
       it "updates the dependency and does not downgrade the composer version" do
         expect(updated_lockfile_entry["version"]).to eq("1.22.1")
+<<<<<<< HEAD
         expect(parsed_updated_lockfile_content["plugin-api-version"]).to eq("2.2.0")
+=======
+        expect(parsed_updated_lockfile_content["plugin-api-version"]).to eq("2.1.0")
+>>>>>>> azure_changes
       end
     end
   end

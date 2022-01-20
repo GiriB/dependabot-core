@@ -59,6 +59,15 @@ module Dependabot
               end
             end
           end
+
+          parsed_file(file).fetch("terraform", []).each do |terraform|
+            required_providers = terraform.fetch("required_providers", {})
+            required_providers.each do |provider|
+              provider.each do |name, details|
+                dependency_set << build_provider_dependency(file, name, details)
+              end
+            end
+          end
         end
       end
 
