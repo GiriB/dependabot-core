@@ -161,7 +161,7 @@ RSpec.describe Dependabot::Composer::UpdateChecker::VersionResolver do
         expect { resolver.latest_resolvable_version }.
           to raise_error(Dependabot::DependencyFileNotResolvable) do |error|
             expect(error.message).to start_with(
-              'The "https://dependabot.com/composer-not-found/packages.json"'\
+              'The "https://github.com/dependabot/composer-not-found/packages.json"'\
               " file could not be downloaded"
             )
           end
@@ -225,6 +225,52 @@ RSpec.describe Dependabot::Composer::UpdateChecker::VersionResolver do
       it "raises a Dependabot::DependencyFileNotResolvable error" do
         expect { resolver.latest_resolvable_version }.
           to raise_error(Dependabot::DependencyFileNotResolvable)
+      end
+    end
+
+    context "with a missing vcs repository source (composer v1)" do
+      let(:project_name) { "v1/vcs_source_unreachable" }
+
+      it "raises a Dependabot::DependencyFileNotResolvable error" do
+        expect { resolver.latest_resolvable_version }.
+          to raise_error(Dependabot::GitDependenciesNotReachable) do |error|
+            expect(error.dependency_urls).
+              to eq(["https://github.com/dependabot-fixtures/this-repo-does-not-exist.git"])
+          end
+      end
+    end
+
+    context "with a missing vcs repository source" do
+      let(:project_name) { "vcs_source_unreachable" }
+
+      it "raises a Dependabot::DependencyFileNotResolvable error" do
+        expect { resolver.latest_resolvable_version }.
+          to raise_error(Dependabot::GitDependenciesNotReachable) do |error|
+            expect(error.dependency_urls).
+              to eq(["https://github.com/dependabot-fixtures/this-repo-does-not-exist.git"])
+          end
+      end
+    end
+
+    context "with a missing git repository source" do
+      let(:project_name) { "git_source_unreachable" }
+      let(:dependency_name) { "symfony/polyfill-mbstring" }
+      let(:dependency_version) { "1.0.1" }
+      let(:requirements) do
+        [{
+          file: "composer.json",
+          requirement: "1.0.*",
+          groups: [],
+          source: nil
+        }]
+      end
+
+      it "raises a Dependabot::DependencyFileNotResolvable error" do
+        expect { resolver.latest_resolvable_version }.
+          to raise_error(Dependabot::GitDependenciesNotReachable) do |error|
+            expect(error.dependency_urls).
+              to eq(["https://github.com/no-exist-sorry/monolog.git"])
+          end
       end
     end
 

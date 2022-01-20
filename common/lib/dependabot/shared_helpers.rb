@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
-require "json"
-require "tmpdir"
-require "excon"
-require "English"
 require "digest"
+require "English"
+require "excon"
+require "fileutils"
+require "json"
 require "open3"
 require "shellwords"
+require "tmpdir"
 
 require "dependabot/utils"
 require "dependabot/errors"
@@ -39,10 +40,14 @@ module Dependabot
 
     def self.in_a_temporary_directory(directory = "/")
       Dir.mkdir(Utils::BUMP_TMP_DIR_PATH) unless Dir.exist?(Utils::BUMP_TMP_DIR_PATH)
-      Dir.mktmpdir(Utils::BUMP_TMP_FILE_PREFIX, Utils::BUMP_TMP_DIR_PATH) do |dir|
-        path = Pathname.new(File.join(dir, directory)).expand_path
+      tmp_dir = Dir.mktmpdir(Utils::BUMP_TMP_FILE_PREFIX, Utils::BUMP_TMP_DIR_PATH)
+
+      begin
+        path = Pathname.new(File.join(tmp_dir, directory)).expand_path
         FileUtils.mkpath(path)
         Dir.chdir(path) { yield(path) }
+      ensure
+        FileUtils.rm_rf(tmp_dir)
       end
     end
 
@@ -64,7 +69,7 @@ module Dependabot
 
     # Escapes all special characters, e.g. = & | <>
     def self.escape_command(command)
-      command_parts = command.split(" ").map(&:strip).reject(&:empty?)
+      command_parts = command.split.map(&:strip).reject(&:empty?)
       Shellwords.join(command_parts)
     end
 
@@ -82,7 +87,7 @@ module Dependabot
       if ENV["DEBUG_FUNCTION"] == function
         puts helper_subprocess_bash_command(stdin_data: stdin_data, command: cmd, env: env)
         # Pause execution so we can run helpers inside the temporary directory
-        byebug # rubocop:disable Lint/Debugger
+        debugger # rubocop:disable Lint/Debugger
       end
 
       env_cmd = [env, cmd].compact
@@ -275,10 +280,10 @@ module Dependabot
       FileUtils.mv(backup_path, GIT_CONFIG_GLOBAL_PATH)
     end
 
-    def self.run_shell_command(command, allow_unsafe_shell_command: false)
+    def self.run_shell_command(command, allow_unsafe_shell_command: false, env: {})
       start = Time.now
       cmd = allow_unsafe_shell_command ? command : escape_command(command)
-      stdout, process = Open3.capture2e(cmd)
+      stdout, process = Open3.capture2e(env || {}, cmd)
       time_taken = Time.now - start
 
       # Raise an error with the output from the shell session if the

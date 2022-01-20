@@ -1,3 +1,5 @@
-#!/bin/sh
+#!/bin/bash
 
-echo "$@"
+set -e
+
+echo "$TEST_ENV$@"

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Functions
   class ForceUpdater
     class TransitiveDependencyError < StandardError; end
@@ -104,7 +106,7 @@ module Functions
         gemfile_name,
         lockfile_name,
         gems: gems_to_unlock + subdependencies,
-        lock_shared_dependencies: true
+        conservative: true
       )
 
       # Remove the Gemfile / gemspec requirements on the gems we're

@@ -13,6 +13,8 @@ module Dependabot
           registry.yarnpkg.com
         ).freeze
 
+        SCOPED_REGISTRY = /^\s*@(?<scope>\S+):registry\s*=\s*(?<registry>\S+)/.freeze
+
         def initialize(dependency_files:, credentials:)
           @dependency_files = dependency_files
           @credentials = credentials
@@ -23,7 +25,8 @@ module Dependabot
           initial_content =
             if npmrc_file then complete_npmrc_from_credentials
             elsif yarnrc_file then build_npmrc_from_yarnrc
-            else build_npmrc_content_from_lockfile
+            else
+              build_npmrc_content_from_lockfile
             end
 
           return initial_content || "" unless registry_credentials.any?
@@ -44,7 +47,7 @@ module Dependabot
           "always-auth = true"
         end
 
-        def global_registry
+        def global_registry # rubocop:disable Metrics/PerceivedComplexity
           @global_registry ||=
             registry_credentials.find do |cred|
               next false if CENTRAL_REGISTRIES.include?(cred["registry"])
@@ -52,7 +55,10 @@ module Dependabot
               # If all the URLs include this registry, it's global
               next true if dependency_urls.all? { |url| url.include?(cred["registry"]) }
 
-              # If any unscoped URLs include this registry, it's global
+              # Check if this registry has already been defined in .npmrc as a scoped registry
+              next false if npmrc_scoped_registries.any? { |sr| sr.include?(cred["registry"]) }
+
+              # If any unscoped URLs include this registry, assume it's global
               dependency_urls.
                 reject { |u| u.include?("@") || u.include?("%40") }.
                 any? { |url| url.include?(cred["registry"]) }
@@ -148,6 +154,15 @@ module Dependabot
 
           # Work around a suspected yarn bug
           ["always-auth = true"] + lines
+        end
+
+        def npmrc_scoped_registries
+          return [] unless npmrc_file
+
+          @npmrc_scoped_registries ||=
+            npmrc_file.content.lines.select { |line| line.match?(SCOPED_REGISTRY) }.
+            map { |line| line.match(SCOPED_REGISTRY)&.named_captures&.fetch("registry") }.
+            compact
         end
 
         # rubocop:disable Metrics/PerceivedComplexity

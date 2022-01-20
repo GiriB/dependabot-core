@@ -31,6 +31,7 @@ module Dependabot
             '\['git',
             \s+'clone',
             \s+'--recurse-submodules',
+            \s+'(--)?',
             \s+'(?<url>.+?)'.*
             \s+exit\s+status\s+128
           /mx.freeze
@@ -89,7 +90,8 @@ module Dependabot
 
                 updated_lockfile =
                   if File.exist?("poetry.lock") then File.read("poetry.lock")
-                  else File.read("pyproject.lock")
+                  else
+                    File.read("pyproject.lock")
                   end
                 updated_lockfile = TomlRB.parse(updated_lockfile)
 
@@ -263,7 +265,7 @@ module Dependabot
           pyproject_object = TomlRB.parse(pyproject_content)
           poetry_object = pyproject_object.dig("tool", "poetry")
 
-          %w(dependencies dev-dependencies).each do |type|
+          Dependabot::Python::FileParser::PoetryFilesParser::POETRY_DEPENDENCY_TYPES.each do |type|
             names = poetry_object[type]&.keys || []
             pkg_name = names.find { |nm| normalise(nm) == dependency.name }
             next unless pkg_name

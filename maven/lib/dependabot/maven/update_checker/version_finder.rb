@@ -2,6 +2,7 @@
 
 require "nokogiri"
 require "dependabot/shared_helpers"
+require "dependabot/update_checkers/version_filters"
 require "dependabot/maven/file_parser/repositories_finder"
 require "dependabot/maven/update_checker"
 require "dependabot/maven/version"
@@ -12,9 +13,7 @@ module Dependabot
   module Maven
     class UpdateChecker
       class VersionFinder
-        TYPE_SUFFICES = %w(jre android java).freeze
-
-        MAVEN_RANGE_REGEX = /[\(\[].*,.*[\)\]]/.freeze
+        TYPE_SUFFICES = %w(jre android java native_mt agp).freeze
 
         def initialize(dependency:, dependency_files:, credentials:,
                        ignored_versions:, security_advisories:,
@@ -45,7 +44,8 @@ module Dependabot
           possible_versions = filter_prereleases(possible_versions)
           possible_versions = filter_date_based_versions(possible_versions)
           possible_versions = filter_version_types(possible_versions)
-          possible_versions = filter_vulnerable_versions(possible_versions)
+          possible_versions = Dependabot::UpdateCheckers::VersionFilters.filter_vulnerable_versions(possible_versions,
+                                                                                                    security_advisories)
           possible_versions = filter_ignored_versions(possible_versions)
           possible_versions = filter_lower_versions(possible_versions)
 
@@ -95,36 +95,23 @@ module Dependabot
           filtered = possible_versions
 
           ignored_versions.each do |req|
-            ignore_req = Maven::Requirement.new(parse_requirement_string(req))
+            ignore_requirements = Maven::Requirement.requirements_array(req)
             filtered =
               filtered.
-              reject { |v| ignore_req.satisfied_by?(v.fetch(:version)) }
+              reject { |v| ignore_requirements.any? { |r| r.satisfied_by?(v.fetch(:version)) } }
           end
 
-          raise AllVersionsIgnored if @raise_on_ignored && filtered.empty? && possible_versions.any?
+          if @raise_on_ignored && filter_lower_versions(filtered).empty? &&
+             filter_lower_versions(possible_versions).any?
+            raise AllVersionsIgnored
+          end
 
           filtered
         end
 
-        def parse_requirement_string(string)
-          return string if string.match?(MAVEN_RANGE_REGEX)
-
-          string.split(",").map(&:strip)
-        end
-
-        def filter_vulnerable_versions(possible_versions)
-          versions_array = possible_versions
-
-          security_advisories.each do |advisory|
-            versions_array =
-              versions_array.
-              reject { |v| advisory.vulnerable?(v.fetch(:version)) }
-          end
-
-          versions_array
-        end
-
         def filter_lower_versions(possible_versions)
+          return possible_versions unless dependency.version && version_class.correct?(dependency.version)
+
           possible_versions.select do |v|
             v.fetch(:version) > version_class.new(dependency.version)
           end
@@ -234,13 +221,19 @@ module Dependabot
         def matches_dependency_version_type?(comparison_version)
           return true unless dependency.version
 
-          current_type =
-            TYPE_SUFFICES.
-            find { |t| dependency.version.split(/[.\-]/).include?(t) }
+          current_type = dependency.version.
+                         gsub("native-mt", "native_mt").
+                         split(/[.\-]/).
+                         find do |type|
+                           TYPE_SUFFICES.find { |s| type.include?(s) }
+                         end
 
-          version_type =
-            TYPE_SUFFICES.
-            find { |t| comparison_version.to_s.split(/[.\-]/).include?(t) }
+          version_type = comparison_version.to_s.
+                         gsub("native-mt", "native_mt").
+                         split(/[.\-]/).
+                         find do |type|
+                           TYPE_SUFFICES.find { |s| type.include?(s) }
+                         end
 
           current_type == version_type
         end

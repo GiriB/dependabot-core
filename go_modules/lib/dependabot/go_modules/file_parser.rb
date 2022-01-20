@@ -4,6 +4,7 @@ require "open3"
 require "dependabot/dependency"
 require "dependabot/file_parsers/base/dependency_set"
 require "dependabot/go_modules/path_converter"
+require "dependabot/go_modules/replace_stubber"
 require "dependabot/errors"
 require "dependabot/file_parsers"
 require "dependabot/file_parsers/base"
@@ -17,7 +18,7 @@ module Dependabot
         dependency_set = Dependabot::FileParsers::Base::DependencySet.new
 
         required_packages.each do |dep|
-          dependency_set << dependency_from_details(dep) unless dep["Indirect"]
+          dependency_set << dependency_from_details(dep) unless skip_dependency?(dep)
         end
 
         dependency_set.dependencies
@@ -36,7 +37,8 @@ module Dependabot
       def dependency_from_details(details)
         source =
           if rev_identifier?(details) then git_source(details)
-          else { type: "default", source: details["Path"] }
+          else
+            { type: "default", source: details["Path"] }
           end
 
         version = details["Version"]&.sub(/^v?/, "")
@@ -51,7 +53,7 @@ module Dependabot
         Dependency.new(
           name: details["Path"],
           version: version,
-          requirements: details["Indirect"] ? [] : reqs,
+          requirements: details["Indirect"] || dependency_is_replaced(details) ? [] : reqs,
           package_manager: "go_modules"
         )
       end
@@ -71,26 +73,23 @@ module Dependabot
 
             command = "go mod edit -json"
 
-            # Turn off the module proxy for now, as it's causing issues with
-            # private git dependencies
-            env = { "GOPRIVATE" => "*" }
-
-            stdout, stderr, status = Open3.capture3(env, command)
+            stdout, stderr, status = Open3.capture3(command)
             handle_parser_error(path, stderr) unless status.success?
             JSON.parse(stdout)["Require"] || []
-          rescue Dependabot::DependencyFileNotResolvable
-            # We sometimes see this error if a host times out.
-            # In such cases, retrying (a maximum of 3 times) may fix it.
-            retry_count ||= 0
-            raise if retry_count >= 3
-
-            retry_count += 1
-            retry
           end
       end
 
       def local_replacements
         @local_replacements ||=
+          # Find all the local replacements, and return them with a stub path
+          # we can use in their place. Using generated paths is safer as it
+          # means we don't need to worry about references to parent
+          # directories, etc.
+          ReplaceStubber.new(repo_contents_path).stub_paths(manifest, go_mod.directory)
+      end
+
+      def manifest
+        @manifest ||=
           SharedHelpers.in_a_temporary_directory do |path|
             File.write("go.mod", go_mod.content)
 
@@ -98,22 +97,10 @@ module Dependabot
             # directives
             command = "go mod edit -json"
 
-            # Turn off the module proxy for now, as it's causing issues with
-            # private git dependencies
-            env = { "GOPRIVATE" => "*" }
-
-            stdout, stderr, status = Open3.capture3(env, command)
+            stdout, stderr, status = Open3.capture3(command)
             handle_parser_error(path, stderr) unless status.success?
 
-            # Find all the local replacements, and return them with a stub path
-            # we can use in their place. Using generated paths is safer as it
-            # means we don't need to worry about references to parent
-            # directories, etc.
-            (JSON.parse(stdout)["Replace"] || []).
-              map { |r| r["New"]["Path"] }.
-              compact.
-              select { |p| p.start_with?(".") || p.start_with?("/") }.
-              map { |p| [p, "./" + Digest::SHA2.hexdigest(p)] }
+            JSON.parse(stdout)
           end
       end
 
@@ -162,6 +149,35 @@ module Dependabot
         return raw_version unless raw_version.match?(GIT_VERSION_REGEX)
 
         raw_version.match(GIT_VERSION_REGEX).named_captures.fetch("sha")
+      end
+
+      def skip_dependency?(dep)
+        return true if dep["Indirect"]
+
+        begin
+          path_uri = URI.parse("https://#{dep['Path']}")
+          !path_uri.host.include?(".")
+        rescue URI::InvalidURIError
+          false
+        end
+      end
+
+      def dependency_is_replaced(details)
+        # Mark dependency as replaced if the requested dependency has a
+        # "replace" directive and that either has the same version, or no
+        # version mentioned. This mimics the behaviour of go get -u, and
+        # prevents that we change dependency versions without any impact since
+        # the actual version that is being imported is defined by the replace
+        # directive.
+        if manifest["Replace"]
+          dep_replace = manifest["Replace"].find do |replace|
+            replace["Old"]["Path"] == details["Path"] &&
+              (!replace["Old"]["Version"] || replace["Old"]["Version"] == details["Version"])
+          end
+
+          return true if dep_replace
+        end
+        false
       end
     end
   end

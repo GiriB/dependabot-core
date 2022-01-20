@@ -167,15 +167,19 @@ module Dependabot
             git_specs = NativeHelpers.run_bundler_subprocess(
               bundler_version: bundler_version,
               function: "git_specs",
+              options: options,
               args: {
                 dir: tmp_dir,
                 gemfile_name: gemfile.name,
-                credentials: credentials,
+                credentials: credentials
               }
             )
             git_specs.reject do |spec|
+              uri = URI.parse(spec.fetch("auth_uri"))
+              next false unless %w(http https).include?(uri.scheme)
+
               Excon.get(
-                spec.fetch("auth_uri"),
+                uri.to_s,
                 idempotent: true,
                 **SharedHelpers.excon_defaults
               ).status == 200
@@ -192,10 +196,11 @@ module Dependabot
             NativeHelpers.run_bundler_subprocess(
               bundler_version: bundler_version,
               function: "jfrog_source",
+              options: options,
               args: {
                 dir: dir,
                 gemfile_name: gemfile.name,
-                credentials: credentials,
+                credentials: credentials
               }
             )
           end

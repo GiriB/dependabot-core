@@ -2,7 +2,8 @@
 
 require "rspec/its"
 require "webmock/rspec"
-require "byebug"
+require "debug"
+require "tmpdir"
 
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 $LOAD_PATH.unshift(File.expand_path("../monkey_patches", __dir__))
@@ -36,9 +37,7 @@ def project_dependency_files(project)
     files = files.select { |f| File.file?(f) }
     files.map do |filename|
       content = File.read(filename)
-      if filename == "Gemfile.lock"
-        content = content.gsub(LOCKFILE_ENDING, "")
-      end
+      content = content.gsub(LOCKFILE_ENDING, "") if filename == "Gemfile.lock"
       {
         name: filename,
         content: content

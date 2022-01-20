@@ -4,27 +4,24 @@ require "dependabot/shared_helpers"
 require "dependabot/errors"
 require "dependabot/go_modules/file_updater"
 require "dependabot/go_modules/native_helpers"
+require "dependabot/go_modules/replace_stubber"
 require "dependabot/go_modules/resolvability_errors"
 
 module Dependabot
   module GoModules
     class FileUpdater
       class GoModUpdater
-        # Turn off the module proxy for now, as it's causing issues with
-        # private git dependencies
-        ENVIRONMENT = { "GOPRIVATE" => "*" }.freeze
-
         RESOLVABILITY_ERROR_REGEXES = [
           # The checksum in go.sum does not match the downloaded content
           /verifying .*: checksum mismatch/.freeze,
-          /go: .*: go.mod has post-v\d+ module path/
+          /go (?:get)?: .*: go.mod has post-v\d+ module path/
         ].freeze
 
         REPO_RESOLVABILITY_ERROR_REGEXES = [
           /fatal: The remote end hung up unexpectedly/,
           /repository '.+' not found/,
           # (Private) module could not be fetched
-          /go: .*: git fetch .*: exit status 128/.freeze,
+          /go: .*: git (fetch|ls-remote) .*: exit status 128/m.freeze,
           # (Private) module could not be found
           /cannot find module providing package/.freeze,
           # Package in module was likely renamed or removed
@@ -34,14 +31,15 @@ module Dependabot
           /go: .*: invalid pseudo-version/m.freeze,
           # Package does not exist, has been pulled or cannot be reached due to
           # auth problems with either git or the go proxy
-          /go: .*: unknown revision/m.freeze
+          /go: .*: unknown revision/m.freeze,
+          # Package pointing to a proxy that 404s
+          /go: .*: unrecognized import path/m.freeze
         ].freeze
 
         MODULE_PATH_MISMATCH_REGEXES = [
-          /go get: \S+ updating to\n\s+\S+\sparsing\sgo.mod:\n\s+module declares its path as: \S+\n\s+but was required as: \S+/,
-          /go: ([^@\s]+)(?:@[^\s]+)?: .* has non-.* module path "(.*)" at/,
+          /go(?: get)?: ([^@\s]+)(?:@[^\s]+)?: .* has non-.* module path "(.*)" at/,
           /go: ([^@\s]+)(?:@[^\s]+)?: .* unexpected module path "(.*)"/,
-          /go: ([^@\s]+)(?:@[^\s]+)?: .* declares its path as: ([\S]*)/m
+          /go(?: get)?: ([^@\s]+)(?:@[^\s]+)?:? .* declares its path as: ([\S]*)/m
         ].freeze
 
         OUT_OF_DISK_REGEXES = [
@@ -59,6 +57,7 @@ module Dependabot
           @directory = directory
           @tidy = options.fetch(:tidy, false)
           @vendor = options.fetch(:vendor, false)
+          @goprivate = options.fetch(:goprivate)
         end
 
         def updated_go_mod_content
@@ -91,16 +90,19 @@ module Dependabot
             # Replace full paths with path hashes in the go.mod
             substitute_all(substitutions)
 
-            # Set the stubbed replace directives
-            update_go_mod(dependencies)
+            # Bump the deps we want to upgrade using `go get lib@version`
+            run_go_get(dependencies)
 
-            # Then run `go get` to pick up other changes to the file caused by
-            # the upgrade
+            # Run `go get`'s internal validation checks against _each_ module in `go.mod`
+            # by running `go get` w/o specifying any library. It finds problems like when a
+            # module declares itself using a different name than specified in our `go.mod` etc.
             run_go_get
 
             # If we stubbed modules, don't run `go mod {tidy,vendor}` as
             # dependencies are incomplete
             if substitutions.empty?
+              # go mod tidy should run before go mod vendor to ensure any
+              # dependencies removed by go mod tidy are also removed from vendors.
               run_go_mod_tidy
               run_go_vendor
             else
@@ -134,45 +136,24 @@ module Dependabot
         def run_go_mod_tidy
           return unless tidy?
 
-          # NOTE(arslan): use `go mod tidy -e` once Go 1.16 is out:
-          # https://github.com/golang/go/commit/3aa09489ab3aa13a3ac78b1ff012b148ffffe367
-          command = "go mod tidy"
+          command = "go mod tidy -e"
 
           # we explicitly don't raise an error for 'go mod tidy' and silently
           # continue here. `go mod tidy` shouldn't block updating versions
           # because there are some edge cases where it's OK to fail (such as
           # generated files not available yet to us).
-          Open3.capture3(ENVIRONMENT, command)
+          Open3.capture3(environment, command)
         end
 
         def run_go_vendor
           return unless vendor?
 
           command = "go mod vendor"
-          _, stderr, status = Open3.capture3(ENVIRONMENT, command)
+          _, stderr, status = Open3.capture3(environment, command)
           handle_subprocess_error(stderr) unless status.success?
         end
 
-        def update_go_mod(dependencies)
-          deps = dependencies.map do |dep|
-            {
-              name: dep.name,
-              version: "v" + dep.version.sub(/^v/i, ""),
-              indirect: dep.requirements.empty?
-            }
-          end
-
-          body = SharedHelpers.run_helper_subprocess(
-            command: NativeHelpers.helper_path,
-            env: ENVIRONMENT,
-            function: "updateDependencyFile",
-            args: { dependencies: deps }
-          )
-
-          write_go_mod(body)
-        end
-
-        def run_go_get
+        def run_go_get(dependencies = [])
           tmp_go_file = "#{SecureRandom.hex}.go"
 
           package = Dir.glob("[^\._]*.go").any? do |path|
@@ -181,7 +162,16 @@ module Dependabot
 
           File.write(tmp_go_file, "package dummypkg\n") unless package
 
-          _, stderr, status = Open3.capture3(ENVIRONMENT, "go get -d")
+          # TODO: go 1.18 will make `-d` the default behavior, so remove the flag then
+          command = +"go get -d"
+          # `go get` accepts multiple packages, each separated by a space
+          dependencies.each do |dep|
+            version = "v" + dep.version.sub(/^v/i, "")
+            command << " #{dep.name}@#{version}"
+          end
+          command = SharedHelpers.escape_command(command)
+
+          _, stderr, status = Open3.capture3(environment, command)
           handle_subprocess_error(stderr) unless status.success?
         ensure
           File.delete(tmp_go_file) if File.exist?(tmp_go_file)
@@ -189,7 +179,7 @@ module Dependabot
 
         def parse_manifest
           command = "go mod edit -json"
-          stdout, stderr, status = Open3.capture3(ENVIRONMENT, command)
+          stdout, stderr, status = Open3.capture3(environment, command)
           handle_subprocess_error(stderr) unless status.success?
 
           JSON.parse(stdout) || {}
@@ -224,37 +214,8 @@ module Dependabot
         # process afterwards.
         def replace_directive_substitutions(manifest)
           @replace_directive_substitutions ||=
-            (manifest["Replace"] || []).
-            map { |r| r["New"]["Path"] }.
-            compact.
-            select { |p| stub_replace_path?(p) }.
-            map { |p| [p, "./" + Digest::SHA2.hexdigest(p)] }.
-            to_h
-        end
-
-        # returns true if the provided path should be replaced with a stub
-        def stub_replace_path?(path)
-          return true if absolute_path?(path)
-          return false unless relative_replacement_path?(path)
-
-          resolved_path = module_pathname.join(path).realpath
-          inside_repo_contents_path = resolved_path.to_s.start_with?(repo_contents_path.to_s)
-          !inside_repo_contents_path
-        rescue Errno::ENOENT
-          true
-        end
-
-        def absolute_path?(path)
-          path.start_with?("/")
-        end
-
-        def relative_replacement_path?(path)
-          # https://golang.org/ref/mod#go-mod-file-replace
-          path.start_with?("./") || path.start_with?("../")
-        end
-
-        def module_pathname
-          @module_pathname ||= Pathname.new(repo_contents_path).join(directory.sub(%r{^/}, ""))
+            Dependabot::GoModules::ReplaceStubber.new(repo_contents_path).
+            stub_paths(manifest, directory)
         end
 
         def substitute_all(substitutions)
@@ -265,7 +226,7 @@ module Dependabot
           write_go_mod(body)
         end
 
-        def handle_subprocess_error(stderr)
+        def handle_subprocess_error(stderr) # rubocop:disable Metrics/AbcSize
           stderr = stderr.gsub(Dir.getwd, "")
 
           # Package version doesn't match the module major version
@@ -275,10 +236,14 @@ module Dependabot
             raise Dependabot::DependencyFileNotResolvable, error_message
           end
 
+          if (matches = stderr.match(/Authentication failed for '(?<url>.+)'/))
+            raise Dependabot::PrivateSourceAuthenticationFailure, matches[:url]
+          end
+
           repo_error_regex = REPO_RESOLVABILITY_ERROR_REGEXES.find { |r| stderr =~ r }
           if repo_error_regex
             error_message = filter_error_message(message: stderr, regex: repo_error_regex)
-            ResolvabilityErrors.handle(error_message, credentials: credentials)
+            ResolvabilityErrors.handle(error_message, credentials: credentials, goprivate: @goprivate)
           end
 
           path_regex = MODULE_PATH_MISMATCH_REGEXES.find { |r| stderr =~ r }
@@ -292,10 +257,6 @@ module Dependabot
           if out_of_disk_regex
             error_message = filter_error_message(message: stderr, regex: out_of_disk_regex)
             raise Dependabot::OutOfDisk.new, error_message
-          end
-
-          if (matches = stderr.match(/Authentication failed for '(?<url>.+)'/))
-            raise Dependabot::PrivateSourceAuthenticationFailure, matches[:url]
           end
 
           # We don't know what happened so we raise a generic error
@@ -327,6 +288,10 @@ module Dependabot
 
         def vendor?
           !!@vendor
+        end
+
+        def environment
+          { "GOPRIVATE" => @goprivate }
         end
       end
     end

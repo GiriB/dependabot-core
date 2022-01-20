@@ -50,7 +50,7 @@ module Dependabot
         requirements = requirements.flatten.flat_map do |req_string|
           next if req_string.nil?
 
-          req_string.split(",").map do |r|
+          req_string.split(",").map(&:strip).map do |r|
             convert_python_constraint_to_ruby_constraint(r)
           end
         end
@@ -82,7 +82,8 @@ module Dependabot
         if req_string.match?(/~[^>]/) then convert_tilde_req(req_string)
         elsif req_string.start_with?("^") then convert_caret_req(req_string)
         elsif req_string.include?(".*") then convert_wildcard(req_string)
-        else req_string
+        else
+          req_string
         end
       end
 
@@ -108,7 +109,8 @@ module Dependabot
           if i < first_non_zero_index then part
           elsif i == first_non_zero_index then (part.to_i + 1).to_s
           elsif i > first_non_zero_index && i == 2 then "0.a"
-          else 0
+          else
+            0
           end
         end.join(".")
 

@@ -1,8 +1,15 @@
+# frozen_string_literal: true
+
 require "bundler"
 require "json"
 
 $LOAD_PATH.unshift(File.expand_path("./lib", __dir__))
 $LOAD_PATH.unshift(File.expand_path("./monkey_patches", __dir__))
+
+trap "HUP" do
+  puts JSON.generate(error: "timeout", error_class: "Timeout::Error", trace: [])
+  exit 2
+end
 
 # Bundler monkey patches
 require "definition_ruby_version_patch"
@@ -36,9 +43,9 @@ begin
   args = request["args"].transform_keys(&:to_sym)
 
   output({ result: Functions.send(function, **args) })
-rescue => error
+rescue StandardError => e
   output(
-    { error: error.message, error_class: error.class, trace: error.backtrace }
+    { error: e.message, error_class: e.class, trace: e.backtrace }
   )
   exit(1)
 end

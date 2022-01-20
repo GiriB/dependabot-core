@@ -20,11 +20,6 @@ module Dependabot
 
       DEPENDENCY_TYPES =
         %w(dependencies devDependencies optionalDependencies).freeze
-      CENTRAL_REGISTRIES = %w(
-        https://registry.npmjs.org
-        http://registry.npmjs.org
-        https://registry.yarnpkg.com
-      ).freeze
       GIT_URL_REGEX = %r{
         (?<git_prefix>^|^git.*?|^github:|^bitbucket:|^gitlab:|github\.com/)
         (?<username>[a-z0-9-]+)/
@@ -275,7 +270,8 @@ module Dependabot
                    split("#").first
                elsif prefix.include?("bitbucket") then "bitbucket.org"
                elsif prefix.include?("gitlab") then "gitlab.com"
-               else "github.com"
+               else
+                 "github.com"
                end
 
         {
@@ -301,7 +297,8 @@ module Dependabot
             # Sonatype Nexus / Artifactory JFrog format
             resolved_url.split("/#{name}/-/#{name.split('/').last}").first
           elsif (cred_url = url_for_relevant_cred(resolved_url)) then cred_url
-          else resolved_url.split("/")[0..2].join("/")
+          else
+            resolved_url.split("/")[0..2].join("/")
           end
 
         { type: "registry", url: url }

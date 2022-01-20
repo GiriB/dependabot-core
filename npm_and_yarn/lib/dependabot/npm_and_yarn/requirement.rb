@@ -8,6 +8,7 @@ module Dependabot
     class Requirement < Gem::Requirement
       AND_SEPARATOR = /(?<=[a-zA-Z0-9*])\s+(?:&+\s+)?(?!\s*[|-])/.freeze
       OR_SEPARATOR = /(?<=[a-zA-Z0-9*])\s*\|+/.freeze
+      LATEST_REQUIREMENT = "latest"
 
       # Override the version pattern to allow a 'v' prefix
       quoted = OPS.keys.map { |k| Regexp.quote(k) }.join("|")
@@ -17,6 +18,7 @@ module Dependabot
       PATTERN = /\A#{PATTERN_RAW}\z/.freeze
 
       def self.parse(obj)
+        return ["=", nil] if obj.is_a?(String) && obj.strip == LATEST_REQUIREMENT
         return ["=", NpmAndYarn::Version.new(obj.to_s)] if obj.is_a?(Gem::Version)
 
         unless (matches = PATTERN.match(obj.to_s))
@@ -45,9 +47,9 @@ module Dependabot
       end
 
       def initialize(*requirements)
-        requirements = requirements.flatten.flat_map do |req_string|
-          convert_js_constraint_to_ruby_constraint(req_string)
-        end
+        requirements = requirements.flatten.
+                       flat_map { |req_string| req_string.split(",").map(&:strip) }.
+                       flat_map { |req_string| convert_js_constraint_to_ruby_constraint(req_string) }
 
         super(requirements)
       end
@@ -66,7 +68,8 @@ module Dependabot
         elsif req_string.start_with?("^") then convert_caret_req(req_string)
         elsif req_string.include?(" - ") then convert_hyphen_req(req_string)
         elsif req_string.match?(/[<>]/) then req_string
-        else ruby_range(req_string)
+        else
+          ruby_range(req_string)
         end
       end
 
@@ -120,7 +123,8 @@ module Dependabot
           if i < first_non_zero_index then part
           elsif i == first_non_zero_index then (part.to_i + 1).to_s
           elsif i > first_non_zero_index && i == 2 then "0.a"
-          else 0
+          else
+            0
           end
         end.join(".")
 

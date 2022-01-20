@@ -43,6 +43,27 @@ RSpec.describe Dependabot::Gradle::FileParser::RepositoriesFinder do
         )
       end
 
+      context "with a script plugin" do
+        let(:dependency_files) { [buildfile, script_plugin] }
+        let(:buildfile_fixture_name) { "with_dependency_script.gradle" }
+        let(:script_plugin) do
+          Dependabot::DependencyFile.new(
+            name: "gradle/dependencies.gradle",
+            content: fixture("script_plugins", "dependencies.gradle")
+          )
+        end
+
+        it "includes the additional declarations" do
+          expect(repository_urls).to match_array(
+            %w(
+              https://jcenter.bintray.com
+              https://plugins.gradle.org/m2
+              https://repo.example.com
+            )
+          )
+        end
+      end
+
       context "some of which are for subprojects" do
         let(:buildfile_fixture_name) { "subproject_repos.gradle" }
 
@@ -67,6 +88,7 @@ RSpec.describe Dependabot::Gradle::FileParser::RepositoriesFinder do
                 https://jcenter.bintray.com
                 https://dl.bintray.com/magnusja/maven
                 https://maven.google.com
+                https://plugins.gradle.org/m2
               )
             )
           end
@@ -111,6 +133,20 @@ RSpec.describe Dependabot::Gradle::FileParser::RepositoriesFinder do
             %w(
               https://jcenter.bintray.com
               https://hub.spigotmc.org/nexus/content/repositories/snapshots
+            )
+          )
+        end
+      end
+
+      context "that use an assignment operator and a strict URI" do
+        let(:buildfile_fixture_name) { "custom_repos_build_assignment_uri.gradle" }
+
+        it "includes the additional declarations" do
+          expect(repository_urls).to match_array(
+            %w(
+              https://maven.google.com
+              https://uri-helper.com
+              https://java-constructor.com
             )
           )
         end

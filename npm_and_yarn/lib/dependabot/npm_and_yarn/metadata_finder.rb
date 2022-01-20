@@ -6,6 +6,7 @@ require "time"
 require "dependabot/metadata_finders"
 require "dependabot/metadata_finders/base"
 require "dependabot/shared_helpers"
+require "dependabot/npm_and_yarn/update_checker/registry_finder"
 require "dependabot/npm_and_yarn/version"
 
 module Dependabot
@@ -92,9 +93,8 @@ module Dependabot
 
       def new_source
         sources = dependency.requirements.
-                  map { |r| r.fetch(:source) }.uniq.compact
-
-        raise "Multiple sources! #{sources.join(', ')}" if sources.count > 1
+                  map { |r| r.fetch(:source) }.uniq.compact.
+                  sort_by { |source| UpdateChecker::RegistryFinder.central_registry?(source[:url]) ? 1 : 0 }
 
         sources.first
       end
@@ -197,7 +197,8 @@ module Dependabot
       def dependency_url
         registry_url =
           if new_source.nil? then "https://registry.npmjs.org"
-          else new_source.fetch(:url)
+          else
+            new_source.fetch(:url)
           end
 
         # NPM registries expect slashes to be escaped
@@ -222,7 +223,8 @@ module Dependabot
 
       def dependency_registry
         if new_source.nil? then "registry.npmjs.org"
-        else new_source.fetch(:url).gsub("https://", "").gsub("http://", "")
+        else
+          new_source.fetch(:url).gsub("https://", "").gsub("http://", "")
         end
       end
 

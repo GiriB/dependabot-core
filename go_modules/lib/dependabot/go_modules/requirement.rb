@@ -49,7 +49,7 @@ module Dependabot
 
       def initialize(*requirements)
         requirements = requirements.flatten.flat_map do |req_string|
-          req_string.split(",").map do |r|
+          req_string.split(",").map(&:strip).map do |r|
             convert_go_constraint_to_ruby_constraint(r.strip)
           end
         end
@@ -68,7 +68,8 @@ module Dependabot
         elsif req_string.include?(" - ") then convert_hyphen_req(req_string)
         elsif req_string.match?(/^[\dv^]/) then convert_caret_req(req_string)
         elsif req_string.match?(/[<=>]/) then req_string
-        else ruby_range(req_string)
+        else
+          ruby_range(req_string)
         end
       end
 

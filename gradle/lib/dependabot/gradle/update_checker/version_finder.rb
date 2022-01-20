@@ -2,6 +2,7 @@
 
 require "nokogiri"
 require "dependabot/shared_helpers"
+require "dependabot/update_checkers/version_filters"
 require "dependabot/gradle/file_parser/repositories_finder"
 require "dependabot/gradle/update_checker"
 require "dependabot/gradle/version"
@@ -12,12 +13,8 @@ module Dependabot
   module Gradle
     class UpdateChecker
       class VersionFinder
-        GOOGLE_MAVEN_REPO = "https://maven.google.com"
-        GRADLE_PLUGINS_REPO = "https://plugins.gradle.org/m2"
         KOTLIN_PLUGIN_REPO_PREFIX = "org.jetbrains.kotlin"
-        TYPE_SUFFICES = %w(jre android java).freeze
-
-        GRADLE_RANGE_REGEX = /[\(\[].*,.*[\)\]]/.freeze
+        TYPE_SUFFICES = %w(jre android java native_mt agp).freeze
 
         def initialize(dependency:, dependency_files:, credentials:,
                        ignored_versions:, raise_on_ignored: false,
@@ -48,7 +45,8 @@ module Dependabot
           possible_versions = filter_prereleases(possible_versions)
           possible_versions = filter_date_based_versions(possible_versions)
           possible_versions = filter_version_types(possible_versions)
-          possible_versions = filter_vulnerable_versions(possible_versions)
+          possible_versions = Dependabot::UpdateCheckers::VersionFilters.filter_vulnerable_versions(possible_versions,
+                                                                                                    security_advisories)
           possible_versions = filter_ignored_versions(possible_versions)
           possible_versions = filter_lower_versions(possible_versions)
 
@@ -59,7 +57,7 @@ module Dependabot
           version_details =
             repositories.map do |repository_details|
               url = repository_details.fetch("url")
-              next google_version_details if url == GOOGLE_MAVEN_REPO
+              next google_version_details if url == Gradle::FileParser::RepositoriesFinder::GOOGLE_MAVEN_REPO
 
               dependency_metadata(repository_details).css("versions > version").
                 select { |node| version_class.correct?(node.content) }.
@@ -99,39 +97,26 @@ module Dependabot
           filtered = possible_versions
 
           ignored_versions.each do |req|
-            ignore_req = Gradle::Requirement.new(parse_requirement_string(req))
+            ignore_requirements = Gradle::Requirement.requirements_array(req)
             filtered =
               filtered.
-              reject { |v| ignore_req.satisfied_by?(v.fetch(:version)) }
+              reject { |v| ignore_requirements.any? { |r| r.satisfied_by?(v.fetch(:version)) } }
           end
 
-          raise AllVersionsIgnored if @raise_on_ignored && filtered.empty? && possible_versions.any?
+          if @raise_on_ignored && filter_lower_versions(filtered).empty? &&
+             filter_lower_versions(possible_versions).any?
+            raise AllVersionsIgnored
+          end
 
           filtered
         end
 
-        def filter_vulnerable_versions(possible_versions)
-          versions_array = possible_versions
-
-          security_advisories.each do |advisory|
-            versions_array =
-              versions_array.
-              reject { |v| advisory.vulnerable?(v.fetch(:version)) }
-          end
-
-          versions_array
-        end
-
         def filter_lower_versions(possible_versions)
+          return possible_versions unless dependency.version && version_class.correct?(dependency.version)
+
           possible_versions.select do |v|
             v.fetch(:version) > version_class.new(dependency.version)
           end
-        end
-
-        def parse_requirement_string(string)
-          return string if string.match?(GRADLE_RANGE_REGEX)
-
-          string.split(",").map(&:strip)
         end
 
         def wants_prerelease?
@@ -149,10 +134,10 @@ module Dependabot
         end
 
         def google_version_details
-          url = GOOGLE_MAVEN_REPO
+          url = Gradle::FileParser::RepositoriesFinder::GOOGLE_MAVEN_REPO
           group_id, artifact_id = group_and_artifact_ids
 
-          dependency_metadata_url = "#{GOOGLE_MAVEN_REPO}/"\
+          dependency_metadata_url = "#{Gradle::FileParser::RepositoriesFinder::GOOGLE_MAVEN_REPO}/"\
                                     "#{group_id.tr('.', '/')}/"\
                                     "group-index.xml"
 
@@ -263,7 +248,7 @@ module Dependabot
 
         def plugin_repository_details
           [{
-            "url" => GRADLE_PLUGINS_REPO,
+            "url" => Gradle::FileParser::RepositoriesFinder::GRADLE_PLUGINS_REPO,
             "auth_headers" => {}
           }] + dependency_repository_details
         end
@@ -271,16 +256,18 @@ module Dependabot
         def matches_dependency_version_type?(comparison_version)
           return true unless dependency.version
 
-          current_type = dependency.version.split(/[.\-]/).
+          current_type = dependency.version.
+                         gsub("native-mt", "native_mt").
+                         split(/[.\-]/).
                          find do |type|
-                           TYPE_SUFFICES.
-                             find { |s| type.include?(s) }
+                           TYPE_SUFFICES.find { |s| type.include?(s) }
                          end
 
-          version_type = comparison_version.to_s.split(/[.\-]/).
+          version_type = comparison_version.to_s.
+                         gsub("native-mt", "native_mt").
+                         split(/[.\-]/).
                          find do |type|
-                           TYPE_SUFFICES.
-                             find { |s| type.include?(s) }
+                           TYPE_SUFFICES.find { |s| type.include?(s) }
                          end
 
           current_type == version_type

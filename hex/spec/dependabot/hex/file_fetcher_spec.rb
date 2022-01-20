@@ -251,6 +251,33 @@ RSpec.describe Dependabot::Hex::FileFetcher do
       end
     end
 
+    context "when one of apps evals a top level file" do
+      before do
+        stub_request(:get, url + "apps/bank_web/mix.exs?ref=sha").
+          with(headers: { "Authorization" => "token token" }).
+          to_return(
+            status: 200,
+            body: fixture("github", "contents_elixir_bank_web_mixfile_with_eval.json"),
+            headers: json_header
+          )
+
+        stub_request(:get, url + "evaled.exs?ref=sha").
+          with(headers: { "Authorization" => "token token" }).
+          to_return(
+            status: 200,
+            body:
+              fixture("github", "contents_todo_txt.json"),
+            headers: json_header
+          )
+      end
+
+      it "fetches the evaled file" do
+        expect(file_fetcher_instance.files.count).to eq(5)
+        expect(file_fetcher_instance.files.map(&:name)).
+          to include("evaled.exs")
+      end
+    end
+
     context "when the apps folder doesn't exist" do
       before do
         stub_request(:get, url + "apps?ref=sha").
@@ -330,6 +357,48 @@ RSpec.describe Dependabot::Hex::FileFetcher do
 
     it "fetches the mixfiles for nested sub-apps" do
       expect(file_fetcher_instance.files.count).to eq(4)
+      expect(file_fetcher_instance.files.map(&:name)).
+        to include("apps/bank/mix.exs")
+    end
+  end
+
+  context "with sub-projects" do
+    before do
+      stub_request(:get, url + "?ref=sha").
+        with(headers: { "Authorization" => "token token" }).
+        to_return(
+          status: 200,
+          body: fixture("github", "contents_elixir_umbrella.json"),
+          headers: json_header
+        )
+
+      stub_request(:get, url + "mix.exs?ref=sha").
+        with(headers: { "Authorization" => "token token" }).
+        to_return(
+          status: 200,
+          body: fixture("github", "contents_elixir_sub_project_mixfile.json"),
+          headers: json_header
+        )
+
+      stub_request(:get, url + "apps?ref=sha").
+        with(headers: { "Authorization" => "token token" }).
+        to_return(
+          status: 200,
+          body: fixture("github", "contents_elixir_umbrella_apps.json"),
+          headers: json_header
+        )
+
+      stub_request(:get, url + "apps/bank/mix.exs?ref=sha").
+        with(headers: { "Authorization" => "token token" }).
+        to_return(
+          status: 200,
+          body: fixture("github", "contents_elixir_bank_mixfile.json"),
+          headers: json_header
+        )
+    end
+
+    it "fetches the mixfiles for the sub-apps" do
+      expect(file_fetcher_instance.files.count).to eq(3)
       expect(file_fetcher_instance.files.map(&:name)).
         to include("apps/bank/mix.exs")
     end

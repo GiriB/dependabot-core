@@ -216,16 +216,8 @@ RSpec.describe Dependabot::Python::FileParser do
       end
 
       describe "the first dependency" do
-        subject(:dependency) do
-          dependencies.find do |dep|
-            dep.name == "taxtea"
-          end
-        end
-
         it "has the right details" do
-          expect(dependency).to be_a(Dependabot::Dependency)
-          expect(dependency.name).to eq("taxtea")
-          expect(dependency.version).to be_nil
+          expect(dependencies.map(&:name)).not_to match_array([])
         end
       end
     end
@@ -1321,6 +1313,15 @@ RSpec.describe Dependabot::Python::FileParser do
 
       it "raises UnexpectedExternalCode" do
         expect { dependencies }.to raise_error(Dependabot::UnexpectedExternalCode)
+      end
+    end
+
+    context "with multiple requirements" do
+      let(:files) { project_dependency_files("poetry/multiple_requirements") }
+
+      it "returns the dependencies with multiple requirements" do
+        expect { dependencies }.not_to raise_error
+        expect(dependencies.map(&:name)).to contain_exactly("numpy", "scipy")
       end
     end
   end

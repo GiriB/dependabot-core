@@ -35,12 +35,13 @@ module Dependabot
             NativeHelpers.run_bundler_subprocess(
               bundler_version: bundler_version,
               function: "conflicting_dependencies",
+              options: options,
               args: {
                 dir: tmp_dir,
                 dependency_name: dependency.name,
                 target_version: target_version,
                 credentials: credentials,
-                lockfile_name: lockfile.name,
+                lockfile_name: lockfile.name
               }
             )
           end

@@ -23,14 +23,7 @@ RSpec.describe Dependabot::GoModules::FileUpdater do
   let(:project_name) { "go_sum" }
   let(:repo_contents_path) { build_tmp_repo(project_name) }
 
-  let(:credentials) do
-    [{
-      "type" => "git_source",
-      "host" => "github.com",
-      "username" => "x-access-token",
-      "password" => "token"
-    }]
-  end
+  let(:credentials) { [] }
 
   let(:go_mod) do
     Dependabot::DependencyFile.new(name: "go.mod", content: go_mod_body)
@@ -112,44 +105,6 @@ RSpec.describe Dependabot::GoModules::FileUpdater do
       end
     end
 
-    context "with an indirect dependency from an unreachable repo" do
-      let(:project_name) { "repo_not_found" }
-      let(:dependency_name) { "github.com/go-openapi/spec" }
-      let(:dependency_version) { "0.20.3" }
-      let(:dependency_previous_version) { "0.19.2" }
-      let(:requirements) do
-        [{
-          requirement: ::Gem::Version.new(dependency_version),
-          file: "go.mod",
-          source: { type: "default", source: dependency_name },
-          groups: []
-        }]
-      end
-      let(:previous_requirements) do
-        [{
-          requirement: "v#{dependency_previous_version}",
-          file: "go.mod",
-          source: { type: "default", source: dependency_name },
-          groups: []
-        }]
-      end
-
-      it "raises a helpful error" do
-        expect { updated_files }.to raise_error(
-          Dependabot::PrivateSourceAuthenticationFailure,
-          %r{github\.com/mholt/caddy}
-        )
-      end
-
-      context "with github credentials" do
-        let(:credentials) { github_credentials }
-
-        it "raises a helpful error" do
-          expect { updated_files }.to raise_error(Dependabot::GitDependenciesNotReachable, %r{github\.com/mholt/caddy})
-        end
-      end
-    end
-
     context "without a go.sum" do
       let(:project_name) { "simple" }
       let(:files) { [go_mod] }
@@ -217,7 +172,7 @@ RSpec.describe Dependabot::GoModules::FileUpdater do
             credentials: anything,
             repo_contents_path: anything,
             directory: anything,
-            options: { tidy: false, vendor: false }
+            options: { tidy: false, vendor: false, goprivate: "*" }
           ).and_return(double)
 
         updater.updated_dependency_files

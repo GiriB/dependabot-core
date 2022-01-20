@@ -123,6 +123,30 @@ RSpec.describe Dependabot::Gradle::FileParser do
         end
       end
 
+      describe "the non-git github.com dependency" do
+        subject(:dependency) do
+          dependencies.find do |dep|
+            dep.name == "com.github.salomonbrys.kotson:kotson"
+          end
+        end
+
+        it "has the right details" do
+          expect(dependency).to be_a(Dependabot::Dependency)
+          expect(dependency.name).
+            to eq("com.github.salomonbrys.kotson:kotson")
+          expect(dependency.version).to eq("2.5.0")
+          expect(dependency.requirements).to eq(
+            [{
+              requirement: "2.5.0",
+              file: "build.gradle",
+              groups: [],
+              source: nil,
+              metadata: nil
+            }]
+          )
+        end
+      end
+
       context "when the name uses a property" do
         let(:buildfile_fixture_name) { "name_property.gradle" }
 
@@ -371,7 +395,7 @@ RSpec.describe Dependabot::Gradle::FileParser do
         )
       end
 
-      its(:length) { is_expected.to eq(19) }
+      its(:length) { is_expected.to eq(20) }
 
       describe "the last dependency" do
         subject(:dependency) { dependencies.last }
@@ -398,6 +422,21 @@ RSpec.describe Dependabot::Gradle::FileParser do
           )
         end
       end
+    end
+
+    describe "settings script" do
+      let(:files) { [buildfile, settings_file] }
+      let(:settings_file) do
+        Dependabot::DependencyFile.new(
+          name: "settings.gradle",
+          content: fixture("settings_files", settings_file_fixture_name)
+        )
+      end
+      let(:settings_file_fixture_name) { "buildscript_dependencies_settings.gradle" }
+
+      subject(:dependencies) { parser.parse }
+
+      its(:length) { is_expected.to eq(20) }
     end
 
     context "with kotlin" do
@@ -497,6 +536,30 @@ RSpec.describe Dependabot::Gradle::FileParser do
                   branch: nil,
                   ref: "be5d2cd6deb8cf3ca2c9a740bdacec816871d4f7"
                 },
+                metadata: nil
+              }]
+            )
+          end
+        end
+
+        describe "the non-git github.com dependency" do
+          subject(:dependency) do
+            dependencies.find do |dep|
+              dep.name == "com.github.salomonbrys.kotson:kotson"
+            end
+          end
+
+          it "has the right details" do
+            expect(dependency).to be_a(Dependabot::Dependency)
+            expect(dependency.name).
+              to eq("com.github.salomonbrys.kotson:kotson")
+            expect(dependency.version).to eq("2.5.0")
+            expect(dependency.requirements).to eq(
+              [{
+                requirement: "2.5.0",
+                file: "build.gradle.kts",
+                groups: [],
+                source: nil,
                 metadata: nil
               }]
             )
@@ -702,6 +765,21 @@ RSpec.describe Dependabot::Gradle::FileParser do
             )
           end
         end
+      end
+
+      describe "kotlin settings script" do
+        let(:files) { [buildfile, settings_file] }
+        let(:settings_file) do
+          Dependabot::DependencyFile.new(
+            name: "settings.gradle.kts",
+            content: fixture("settings_files", settings_file_fixture_name)
+          )
+        end
+        let(:settings_file_fixture_name) { "buildscript_dependencies_settings.gradle.kts" }
+
+        subject(:dependencies) { parser.parse }
+
+        its(:length) { is_expected.to eq(20) }
       end
     end
   end

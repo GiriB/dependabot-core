@@ -336,7 +336,8 @@ module Dependabot
               workspace_object.values_at("packages", "nohoist").
                 flatten.compact
             elsif workspace_object.is_a?(Array) then workspace_object
-            else raise "Unexpected workspace object"
+            else
+              raise "Unexpected workspace object"
             end
 
           paths_array.each { |path| path.gsub!(%r{^\./}, "") }
@@ -420,13 +421,9 @@ module Dependabot
             yarnrc_file: yarnrc_file
           ).registry
 
-          return if central_registry?(reg) && !package_name.start_with?("@")
+          return if UpdateChecker::RegistryFinder.central_registry?(reg) && !package_name.start_with?("@")
 
           raise PrivateSourceAuthenticationFailure, reg
-        end
-
-        def central_registry?(registry)
-          FileParser::CENTRAL_REGISTRIES.any? { |r| r.include?(registry) }
         end
 
         def raise_resolvability_error(error_message, yarn_lock)

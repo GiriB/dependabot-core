@@ -436,15 +436,9 @@ module Dependabot
                          find { |f| f.name.end_with?(".yarnrc") }
           ).registry
 
-          return if central_registry?(reg) && !package_name.start_with?("@")
+          return if UpdateChecker::RegistryFinder.central_registry?(reg) && !package_name.start_with?("@")
 
           raise Dependabot::PrivateSourceAuthenticationFailure, reg
-        end
-
-        def central_registry?(registry)
-          NpmAndYarn::FileParser::CENTRAL_REGISTRIES.any? do |r|
-            r.include?(registry)
-          end
         end
 
         def resolvable_before_update?
@@ -621,7 +615,7 @@ module Dependabot
           # Restore npm 7 "packages" "name" entry from package.json if previously set
           updated_lockfile_content = restore_packages_name(updated_lockfile_content, parsed_updated_lockfile_content)
 
-          # Switch back npm 7 lockfile "pacakages" requirements from the package.json
+          # Switch back npm 7 lockfile "packages" requirements from the package.json
           updated_lockfile_content = restore_locked_package_dependencies(
             updated_lockfile_content, parsed_updated_lockfile_content
           )
@@ -756,7 +750,8 @@ module Dependabot
             trimmed_url = url.gsub(/(\d+\.)*tgz$/, "")
             incorrect_url = if url.start_with?("https")
                               trimmed_url.gsub(/^https:/, "http:")
-                            else trimmed_url.gsub(/^http:/, "https:")
+                            else
+                              trimmed_url.gsub(/^http:/, "https:")
                             end
             updated_lockfile_content = updated_lockfile_content.gsub(
               /#{Regexp.quote(incorrect_url)}(?=(\d+\.)*tgz")/,

@@ -3,6 +3,7 @@
 require "excon"
 
 require "dependabot/bundler/update_checker"
+require "dependabot/update_checkers/version_filters"
 require "dependabot/bundler/requirement"
 require "dependabot/shared_helpers"
 require "dependabot/errors"
@@ -55,7 +56,8 @@ module Dependabot
 
           relevant_versions = dependency_source.versions
           relevant_versions = filter_prerelease_versions(relevant_versions)
-          relevant_versions = filter_vulnerable_versions(relevant_versions)
+          relevant_versions = Dependabot::UpdateCheckers::VersionFilters.filter_vulnerable_versions(relevant_versions,
+                                                                                                    security_advisories)
           relevant_versions = filter_ignored_versions(relevant_versions)
           relevant_versions = filter_lower_versions(relevant_versions)
 
@@ -70,18 +72,17 @@ module Dependabot
 
         def filter_ignored_versions(versions_array)
           filtered = versions_array.
-                     reject { |v| ignore_reqs.any? { |r| r.satisfied_by?(v) } }
-          raise AllVersionsIgnored if @raise_on_ignored && filtered.empty? && versions_array.any?
+                     reject { |v| ignore_requirements.any? { |r| r.satisfied_by?(v) } }
+          if @raise_on_ignored && filter_lower_versions(filtered).empty? && filter_lower_versions(versions_array).any?
+            raise AllVersionsIgnored
+          end
 
           filtered
         end
 
-        def filter_vulnerable_versions(versions_array)
-          versions_array.
-            reject { |v| security_advisories.any? { |a| a.vulnerable?(v) } }
-        end
-
         def filter_lower_versions(versions_array)
+          return versions_array unless dependency.version && Gem::Version.correct?(dependency.version)
+
           versions_array.
             select { |version| version > Gem::Version.new(dependency.version) }
         end
@@ -92,11 +93,11 @@ module Dependabot
               current_version = dependency.version
               if current_version && Gem::Version.correct?(current_version) &&
                  Gem::Version.new(current_version).prerelease?
-                return true
-              end
-
-              dependency.requirements.any? do |req|
-                req[:requirement].match?(/[a-z]/i)
+                true
+              else
+                dependency.requirements.any? do |req|
+                  req[:requirement].match?(/[a-z]/i)
+                end
               end
             end
         end
@@ -110,8 +111,14 @@ module Dependabot
           )
         end
 
-        def ignore_reqs
-          ignored_versions.map { |req| Gem::Requirement.new(req.split(",")) }
+        def ignore_requirements
+          ignored_versions.flat_map { |req| requirement_class.requirements_array(req) }
+        end
+
+        def requirement_class
+          Utils.requirement_class_for_package_manager(
+            dependency.package_manager
+          )
         end
 
         def gemfile
