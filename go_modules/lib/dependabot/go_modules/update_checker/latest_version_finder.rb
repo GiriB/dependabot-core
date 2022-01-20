@@ -28,13 +28,22 @@ module Dependabot
         PSEUDO_VERSION_REGEX = /\b\d{14}-[0-9a-f]{12}$/.freeze
 
         def initialize(dependency:, dependency_files:, credentials:,
+<<<<<<< HEAD
                        ignored_versions:, security_advisories:, raise_on_ignored: false)
+=======
+                       ignored_versions:, security_advisories:, raise_on_ignored: false,
+                       goprivate:)
+>>>>>>> 44168cffbace107ee1021713fb71eed53ebc6e56
           @dependency          = dependency
           @dependency_files    = dependency_files
           @credentials         = credentials
           @ignored_versions    = ignored_versions
           @security_advisories = security_advisories
           @raise_on_ignored    = raise_on_ignored
+<<<<<<< HEAD
+=======
+          @goprivate           = goprivate
+>>>>>>> 44168cffbace107ee1021713fb71eed53ebc6e56
         end
 
         def latest_version
@@ -78,16 +87,26 @@ module Dependabot
               manifest = parse_manifest
 
               # Set up an empty go.mod so 'go list -m' won't attempt to download dependencies. This
+<<<<<<< HEAD
               # appears to be a side effect of operating with GOPRIVATE=*. We'll retain any exclude
               # directives to omit those versions.
+=======
+              # appears to be a side effect of operating with modules included in GOPRIVATE. We'll
+              # retain any exclude directives to omit those versions.
+>>>>>>> 44168cffbace107ee1021713fb71eed53ebc6e56
               File.write("go.mod", "module dummy\n")
               manifest["Exclude"]&.each do |r|
                 SharedHelpers.run_shell_command("go mod edit -exclude=#{r['Path']}@#{r['Version']}")
               end
 
+<<<<<<< HEAD
               # Turn off the module proxy for now, as it's causing issues with
               # private git dependencies
               env = { "GOPRIVATE" => "*" }
+=======
+              # Turn off the module proxy for private dependencies
+              env = { "GOPRIVATE" => @goprivate }
+>>>>>>> 44168cffbace107ee1021713fb71eed53ebc6e56
 
               versions_json = SharedHelpers.run_shell_command("go list -m -versions -json #{dependency.name}", env: env)
               version_strings = JSON.parse(versions_json)["Versions"]
@@ -108,7 +127,11 @@ module Dependabot
 
         def handle_subprocess_error(error)
           if RESOLVABILITY_ERROR_REGEXES.any? { |rgx| error.message =~ rgx }
+<<<<<<< HEAD
             ResolvabilityErrors.handle(error.message, credentials: credentials)
+=======
+            ResolvabilityErrors.handle(error.message, credentials: credentials, goprivate: @goprivate)
+>>>>>>> 44168cffbace107ee1021713fb71eed53ebc6e56
           elsif INVALID_VERSION_REGEX =~ error.message
             raise Dependabot::DependencyFileNotResolvable, error.message
           end

@@ -71,7 +71,12 @@ module Dependabot
             credentials: credentials,
             ignored_versions: ignored_versions,
             security_advisories: security_advisories,
+<<<<<<< HEAD
             raise_on_ignored: raise_on_ignored
+=======
+            raise_on_ignored: raise_on_ignored,
+            goprivate: options.fetch(:goprivate, "*")
+>>>>>>> 44168cffbace107ee1021713fb71eed53ebc6e56
           )
       end
 

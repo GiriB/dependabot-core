@@ -9,7 +9,9 @@ module Dependabot
   module Maven
     class FileUpdater
       class DeclarationFinder
-        DECLARATION_TYPES = %w(parent dependency plugin extension).freeze
+        DECLARATION_REGEX =
+          %r{<parent>.*?</parent>|<dependency>.*?</dependency>|
+             <plugin>.*?(?:<plugin>.*?</plugin>.*)?</plugin>|<extension>.*?</extension>}mx.freeze
 
         attr_reader :dependency, :declaring_requirement, :dependency_files
 

@@ -250,10 +250,17 @@ module Dependabot
 
           if error.message.match?(FAILED_GIT_CLONE_WITH_MIRROR)
             dependency_url = error.message.match(FAILED_GIT_CLONE_WITH_MIRROR).named_captures.fetch("url")
+<<<<<<< HEAD
             raise Dependabot::GitDependenciesNotReachable, dependency_url
           elsif error.message.match?(FAILED_GIT_CLONE)
             dependency_url = error.message.match(FAILED_GIT_CLONE).named_captures.fetch("url")
             raise Dependabot::GitDependenciesNotReachable, dependency_url
+=======
+            raise Dependabot::GitDependenciesNotReachable, clean_dependency_url(dependency_url)
+          elsif error.message.match?(FAILED_GIT_CLONE)
+            dependency_url = error.message.match(FAILED_GIT_CLONE).named_captures.fetch("url")
+            raise Dependabot::GitDependenciesNotReachable, clean_dependency_url(dependency_url)
+>>>>>>> 44168cffbace107ee1021713fb71eed53ebc6e56
           elsif unresolvable_error?(error)
             raise Dependabot::DependencyFileNotResolvable, sanitized_message
           elsif error.message.match?(MISSING_EXPLICIT_PLATFORM_REQ_REGEX)
@@ -461,6 +468,15 @@ module Dependabot
           platform["php"] ||= []
           platform["php"] << requirement_php
           platform
+        end
+
+        def clean_dependency_url(dependency_url)
+          return dependency_url unless URI::DEFAULT_PARSER.regexp[:ABS_URI].match?(dependency_url)
+
+          url = URI.parse(dependency_url)
+          url.user = nil
+          url.password = nil
+          url.to_s
         end
 
         def parsed_composer_file
