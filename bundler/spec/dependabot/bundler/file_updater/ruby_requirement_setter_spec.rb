@@ -100,6 +100,20 @@ RSpec.describe Dependabot::Bundler::FileUpdater::RubyRequirementSetter do
           bundler_project_dependency_file("gemfile", filename: "Gemfile").content
         end
         it { is_expected.to include("ruby '3.0.1'\n") }
+<<<<<<< HEAD
+=======
+        it { is_expected.to include(%(gem "business", "~> 1.4.0")) }
+      end
+
+      context "when requiring ruby 3.1" do
+        let(:gemspec) do
+          bundler_project_dependency_file("gemfile_require_ruby_3_1", filename: "example.gemspec")
+        end
+        let(:content) do
+          bundler_project_dependency_file("gemfile", filename: "Gemfile").content
+        end
+        it { is_expected.to include("ruby '3.1.1'\n") }
+>>>>>>> bb84f6c03bd6283c7c83774d41272fd3b07fbbe6
         it { is_expected.to include(%(gem "business", "~> 1.4.0")) }
       end
 

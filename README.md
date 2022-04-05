@@ -11,7 +11,7 @@ Welcome to the public home of Dependabot. This repository serves 2 purposes:
 
 ## Got feedback?
 
-Please file an issue. Bug reports, feature requests, and general feedback are all welcome.
+https://github.com/github/feedback/discussions/categories/dependabot-feedback
 
 ## Contributing to Dependabot
 
@@ -55,6 +55,7 @@ following commands in the cloned Git repository:
 2. `git reset --hard`
 
 You can read more about this in the [Git for Windows wiki](https://github.com/git-for-windows/git/wiki/Git-cannot-create-a-file-or-directory-with-a-long-path).
+<<<<<<< HEAD
 
 ## Cloning the repository
 Clone the repository with Git using:
@@ -70,6 +71,8 @@ following commands in the cloned Git repository:
 2. `git reset --hard`
 
 You can read more about this in the [Git for Windows wiki](https://github.com/git-for-windows/git/wiki/Git-cannot-create-a-file-or-directory-with-a-long-path).
+=======
+>>>>>>> bb84f6c03bd6283c7c83774d41272fd3b07fbbe6
 
 ## Setup
 
@@ -80,6 +83,7 @@ language you can get away with just having that language and Ruby.
 While you can run Dependabot Core without Docker, we provide a development
 Dockerfile that bakes in all required dependencies. In most cases this is the
 best way to work with the project.
+<<<<<<< HEAD
 
 ## Running with Docker
 
@@ -132,6 +136,64 @@ Several Dependabot packages make use of 'native helpers', small executables in t
 
 **Changes to these files are not automatically reflected inside the development container**
 
+=======
+
+## Running with Docker
+
+Start by pulling the developer image from the [GitHub Container Registry][ghcr-core-dev] and then start the developer shell:
+
+```shell
+$ docker pull ghcr.io/dependabot/dependabot-core-development:latest
+$ docker tag ghcr.io/dependabot/dependabot-core-development dependabot/dependabot-core-development
+$ bin/docker-dev-shell
+=> running docker development shell
+[dependabot-core-dev] ~/dependabot-core $
+```
+
+### Dry run script
+
+You can use the "dry-run" script to simulate a dependency update job, printing
+the diff that would be generated to the terminal. It takes two positional
+arguments: the package manager and the GitHub repo name (including the
+account):
+
+```bash
+$ bin/docker-dev-shell
+=> running docker development shell
+$ bin/dry-run.rb go_modules rsc/quote
+=> fetching dependency files
+=> parsing dependency files
+=> updating 2 dependencies
+...
+```
+
+Note: If the dependency files are not in the top-level directory, then you must
+also pass the path to the subdirectory as an argument: `--dir /<subdirectory>`.
+
+### Running the tests
+
+Run the tests by running `rspec spec` inside each of the packages, e.g.
+
+```bash
+$ cd go_modules
+$ bundle exec rspec spec
+```
+
+Style is enforced by RuboCop. To check for style violations, simply run `rubocop` in
+each of the packages, e.g.
+
+```bash
+$ cd go_modules
+$ bundle exec rubocop
+```
+
+### Making changes to native helpers
+
+Several Dependabot packages make use of 'native helpers', small executables in their host language.
+
+**Changes to these files are not automatically reflected inside the development container**
+
+>>>>>>> bb84f6c03bd6283c7c83774d41272fd3b07fbbe6
 Once you have made any edits to the helper files, run the appropriate build script to update the
 installed version with your changes like so:
 

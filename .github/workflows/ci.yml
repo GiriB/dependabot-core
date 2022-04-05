@@ -5,9 +5,9 @@ on:
       - "main"
   pull_request:
     branches:
-      - "**"
+      - "main"
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 permissions:
   contents: read
   packages: write
@@ -19,25 +19,26 @@ jobs:
       fail-fast: false
       matrix:
         suite:
-        - { path: bundler, name: bundler1 }
-        - { path: bundler, name: bundler2 }
-        - { path: cargo, name: cargo }
-        - { path: common, name: common }
-        - { path: composer, name: composer }
-        - { path: docker, name: docker }
-        - { path: elm, name: elm }
-        - { path: git_submodules, name: git_submodules }
-        - { path: github_actions, name: github_actions }
-        - { path: go_modules, name: go_modules }
-        - { path: gradle, name: gradle }
-        - { path: hex, name: hex }
-        - { path: maven, name: maven }
-        - { path: npm_and_yarn, name: npm_and_yarn }
-        - { path: nuget, name: nuget }
-        - { path: omnibus, name: omnibus }
-        - { path: python, name: python }
-        - { path: python, name: python_slow }
-        - { path: terraform, name: terraform }
+          - { path: bundler, name: bundler1 }
+          - { path: bundler, name: bundler2 }
+          - { path: cargo, name: cargo }
+          - { path: common, name: common }
+          - { path: composer, name: composer }
+          - { path: docker, name: docker }
+          - { path: elm, name: elm }
+          - { path: git_submodules, name: git_submodules }
+          - { path: github_actions, name: github_actions }
+          - { path: go_modules, name: go_modules }
+          - { path: gradle, name: gradle }
+          - { path: hex, name: hex }
+          - { path: maven, name: maven }
+          - { path: npm_and_yarn, name: npm_and_yarn }
+          - { path: nuget, name: nuget }
+          - { path: omnibus, name: omnibus }
+          - { path: python, name: python }
+          - { path: python, name: python_slow }
+          - { path: pub, name: pub }
+          - { path: terraform, name: terraform }
     env:
       BASE_IMAGE: ubuntu:18.04
       CORE_IMAGE: dependabot/dependabot-core
@@ -50,12 +51,21 @@ jobs:
       - name: Prepare BRANCH_REF environment variable
         run: echo "BRANCH_REF=$(echo '${{ github.ref }}' | sed -E 's/[^A-Za-z0-9]+/-/g')" >> $GITHUB_ENV
       - name: Log in to GHCR
+<<<<<<< HEAD
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Build dependabot-core image for branch
         env:
           DOCKER_BUILDKIT: 1
         run: |
+=======
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Build dependabot-core image for branch
+        env:
+          DOCKER_BUILDKIT: 1
+        run: |
+>>>>>>> bb84f6c03bd6283c7c83774d41272fd3b07fbbe6
           docker build \
             -t "$CORE_IMAGE:latest" \
             -t "$CORE_BRANCH_IMAGE:$BRANCH_REF" \
