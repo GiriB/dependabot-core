@@ -5,7 +5,7 @@ on:
       - "main"
   pull_request:
     branches:
-      - "**"
+      - "main"
   schedule:
     - cron: "0 0 * * *"
 permissions:
@@ -51,21 +51,12 @@ jobs:
       - name: Prepare BRANCH_REF environment variable
         run: echo "BRANCH_REF=$(echo '${{ github.ref }}' | sed -E 's/[^A-Za-z0-9]+/-/g')" >> $GITHUB_ENV
       - name: Log in to GHCR
-<<<<<<< HEAD
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Build dependabot-core image for branch
         env:
           DOCKER_BUILDKIT: 1
         run: |
-=======
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      - name: Build dependabot-core image for branch
-        env:
-          DOCKER_BUILDKIT: 1
-        run: |
->>>>>>> bb84f6c03bd6283c7c83774d41272fd3b07fbbe6
           docker build \
             -t "$CORE_IMAGE:latest" \
             -t "$CORE_BRANCH_IMAGE:$BRANCH_REF" \
