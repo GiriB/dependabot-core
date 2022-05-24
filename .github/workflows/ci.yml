@@ -2,13 +2,13 @@ name: CI
 on:
   push:
     branches:
-      - "main"
+      - "**"
   pull_request:
     paths-ignore:
       - 'CHANGELOG.md'
       - 'common/lib/dependabot/version.rb'
     branches:
-      - "main"
+      - "**"
   schedule:
     - cron: "0 0 * * *"
 permissions:
