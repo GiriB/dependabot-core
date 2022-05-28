@@ -11,7 +11,7 @@ Welcome to the public home of Dependabot. This repository serves 2 purposes:
 
 ## Got feedback?
 
-Please file an issue. Bug reports, feature requests, and general feedback are all welcome.
+https://github.com/github/feedback/discussions/categories/dependabot-feedback
 
 ## Contributing to Dependabot
 
@@ -56,21 +56,6 @@ following commands in the cloned Git repository:
 
 You can read more about this in the [Git for Windows wiki](https://github.com/git-for-windows/git/wiki/Git-cannot-create-a-file-or-directory-with-a-long-path).
 
-## Cloning the repository
-Clone the repository with Git using:
-
-```
-git clone https://github.com/dependabot/dependabot-core.git
-```
-
-On Windows this might fail with "Filename too long". To solve this, run the
-following commands in the cloned Git repository:
-
-1. `git config core.longpaths true`
-2. `git reset --hard`
-
-You can read more about this in the [Git for Windows wiki](https://github.com/git-for-windows/git/wiki/Git-cannot-create-a-file-or-directory-with-a-long-path).
-
 ## Setup
 
 To run all of Dependabot Core, you'll need Ruby, Python, PHP, Elixir, Node, Go,
@@ -87,6 +72,7 @@ Start by pulling the developer image from the [GitHub Container Registry][ghcr-c
 
 ```shell
 $ docker pull ghcr.io/dependabot/dependabot-core-development:latest
+$ docker tag ghcr.io/dependabot/dependabot-core-development dependabot/dependabot-core-development
 $ bin/docker-dev-shell
 => running docker development shell
 [dependabot-core-dev] ~/dependabot-core $
@@ -108,6 +94,9 @@ $ bin/dry-run.rb go_modules rsc/quote
 => updating 2 dependencies
 ...
 ```
+
+Note: If the dependency files are not in the top-level directory, then you must
+also pass the path to the subdirectory as an argument: `--dir /<subdirectory>`.
 
 ### Running the tests
 
@@ -230,6 +219,9 @@ If the development Docker image isn't present on your machine, it will be built 
 Once that's finished, start the `Debug Dry Run` configuration `(F5)` and you'll be prompted
 to select a package manager and a repository to perform a dry run on.
 Feel free to place breakpoints on the code.
+
+There is also support to debug individual test runs by running the `Debug Tests` configuration `(F5)`
+and you'll be promted to select an ecosystem and provide an rspec path.
 
 ⚠️ The `Clone Repository ...` commands of the Remote Containers extension are currently
 missing some functionality and are therefore not supported. You have to clone the
