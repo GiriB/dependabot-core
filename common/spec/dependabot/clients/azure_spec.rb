@@ -216,6 +216,18 @@ RSpec.describe Dependabot::Clients::Azure do
         expect { subject }.to raise_error(Dependabot::Clients::Azure::Forbidden)
       end
     end
+
+    context "when response is 403" do
+      before do
+        stub_request(:post, pull_request_url).
+          with(basic_auth: [username, password]).
+          to_return(status: 403)
+      end
+
+      it "raises a helpful error" do
+        expect { subject }.to raise_error(Dependabot::Clients::Azure::Forbidden)
+      end
+    end
   end
 
   describe "#pull_request" do
@@ -453,18 +465,6 @@ RSpec.describe Dependabot::Clients::Azure do
           expect(WebMock).to(have_requested(:post, code_search_url).times(1))
           expect(code_paths).to be_empty
         end
-      end
-    end
-
-    context "when response is 400" do
-      before do
-        stub_request(:post, code_search_url).
-          with(basic_auth: [username, password]).
-          to_return(status: 400, body: { "message" => "Invalid Project" }.to_json)
-      end
-
-      it "raises a helpful error" do
-        expect { subject }.to raise_error(Dependabot::Clients::Azure::BadRequest, "Invalid Project")
       end
     end
 

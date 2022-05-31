@@ -1,3 +1,307 @@
+## v0.190.0, 23 May 2022
+
+- Git dependency support for pub (@sigurdm) [#5102](https://github.com/dependabot/dependabot-core/pull/5102)
+- Remove versions from comments (@jeffwidman) [#5181](https://github.com/dependabot/dependabot-core/pull/5181)
+- Cargo: Update rust toolchain to 1.61.0 (@DarkKirb) [#5180](https://github.com/dependabot/dependabot-core/pull/5180)
+- Bump Terraform from 1.0.16 to 1.2.0 (@andrassy) [#5170](https://github.com/dependabot/dependabot-core/pull/5170)
+- fix required checks not run during a release (@jakecoffman) [#5144](https://github.com/dependabot/dependabot-core/pull/5144)
+
+## v0.189.0, 17 May 2022
+
+- Revert "Strip UTF-8 BOM from file contents" (@mattt) [#5145](https://github.com/dependabot/dependabot-core/pull/5145)
+- [Maven] Cache client-side timeouts when a remote host is unreachable (@brrygrdn) [#5142](https://github.com/dependabot/dependabot-core/pull/5142)
+- build(deps): bump @npmcli/arborist from 5.1.0 to 5.2.0 in /npm_and_yarn/helpers [#5133](https://github.com/dependabot/dependabot-core/pull/5133)
+
+## v0.188.0, 16 May 2022
+
+- Dwc0011/fix codecommit error (@dwc0011) [#4926](https://github.com/dependabot/dependabot-core/pull/4926)
+- Upgrade Python to 3.10.4 and support newer releases (@henrikhorluck) [#4976](https://github.com/dependabot/dependabot-core/pull/4976)
+- build(deps): bump npm from 6.14.16 to 6.14.17 in /npm_and_yarn/helpers [#5067](https://github.com/dependabot/dependabot-core/pull/5067)
+- build(deps-dev): bump eslint from 8.13.0 to 8.15.0 in /npm_and_yarn/helpers [#5106](https://github.com/dependabot/dependabot-core/pull/5106)
+- build(deps-dev): bump jest from 27.5.1 to 28.1.0 in /npm_and_yarn/helpers [#5105](https://github.com/dependabot/dependabot-core/pull/5105)
+- build(deps-dev): bump phpstan/phpstan from 1.6.4 to 1.6.8 in /composer/helpers/v2 [#5126](https://github.com/dependabot/dependabot-core/pull/5126)
+- build(deps-dev): bump phpstan/phpstan from 1.6.4 to 1.6.8 in /composer/helpers/v1 [#5127](https://github.com/dependabot/dependabot-core/pull/5127)
+- build(deps-dev): update rubocop requirement from ~> 1.28.2 to ~> 1.29.1 in /common [#5136](https://github.com/dependabot/dependabot-core/pull/5136)
+- skip CI workflow when creating release notes (@jakecoffman) [#5139](https://github.com/dependabot/dependabot-core/pull/5139)
+- Strip UTF-8 BOM from file contents (@mattt) [#5129](https://github.com/dependabot/dependabot-core/pull/5129)
+
+## v0.187.0, 13 May 2022
+
+- Fix Bundler v2 related TODOs (@deivid-rodriguez) [#5034](https://github.com/dependabot/dependabot-core/pull/5034)
+- Add --network-trace to dry-run (@brrygrdn) [#5131](https://github.com/dependabot/dependabot-core/pull/5131)
+- [Maven] Fix some malformed memoizations (@brrygrdn) [#5132](https://github.com/dependabot/dependabot-core/pull/5132)
+- bundler: upgrade to 2.3.13 for rubygems/rubygems#5492 (@jakecoffman) [#5134](https://github.com/dependabot/dependabot-core/pull/5134)
+- [Maven] Avoid retrying requests to repos excessively (@brrygrdn) [#5130](https://github.com/dependabot/dependabot-core/pull/5130)
+- Fix Dependabot ignoring scoped registries if the lockfile resolved uri contains a port number (@brrygrdn) [#5124](https://github.com/dependabot/dependabot-core/pull/5124)
+
+## v0.186.1, 10 May 2022
+
+- Validate before creating version objects in `Dependabot::NpmAndYarn::UpdateChecker::VersionResolver` (@mattt) [#5120](https://github.com/dependabot/dependabot-core/pull/5120)
+- Fix implementation of `PackageName#library_name` (@mattt) [#5119](https://github.com/dependabot/dependabot-core/pull/5119)
+- Clarify comment and remove TODO (@jeffwidman) [#5031](https://github.com/dependabot/dependabot-core/pull/5031)
+- Bump `go` to `1.18.1` (@jeffwidman) [#5029](https://github.com/dependabot/dependabot-core/pull/5029)
+
+## v0.186.0, 10 May 2022
+
+- Updating a package and its related @types package simultaneously (@pavera) [#5000](https://github.com/dependabot/dependabot-core/pull/5000)
+- Remove and ignore `.tool-versions` (@mattt) [#5114](https://github.com/dependabot/dependabot-core/pull/5114)
+- Add fixtures to `paths-ignore` for CodeQL workflow (@mattt) [#5113](https://github.com/dependabot/dependabot-core/pull/5113)
+- Fix code scanning alerts for incomplete sanitization of URL substrings (@mattt) [#5108](https://github.com/dependabot/dependabot-core/pull/5108)
+
+## v0.185.0, 9 May 2022
+
+- fix DependencyFileNotParseable due to 1MB file limit change (@jakecoffman) [#5107](https://github.com/dependabot/dependabot-core/pull/5107)
+- pin debase version to avoid build errors (@pavera) [#5086](https://github.com/dependabot/dependabot-core/pull/5086)
+
+## v0.184.0, 4 May 2022
+
+- nuget: fix PR missing commits in message when using private registry (@jakecoffman) [#5072](https://github.com/dependabot/dependabot-core/pull/5072)
+- [Maven] Avoid an infinite loop if the default branch for a dependency 404s (@brrygrdn) [#5091](https://github.com/dependabot/dependabot-core/pull/5091)
+- build(deps): bump github/codeql-action from 1 to 2 [#5053](https://github.com/dependabot/dependabot-core/pull/5053)
+- Prevent Dependabot from downgrading Dockerfiles if the repository doesn't have the tag yet (@brrygrdn) [#5087](https://github.com/dependabot/dependabot-core/pull/5087)
+- build(deps-dev): update rubocop requirement from ~> 1.27.0 to ~> 1.28.2 in /common [#5050](https://github.com/dependabot/dependabot-core/pull/5050)
+- build(deps-dev): bump phpstan/phpstan from 1.5.6 to 1.6.4 in /composer/helpers/v2 [#5080](https://github.com/dependabot/dependabot-core/pull/5080)
+- build(deps-dev): bump phpstan/phpstan from 1.5.6 to 1.6.4 in /composer/helpers/v1 [#5081](https://github.com/dependabot/dependabot-core/pull/5081)
+- remove multiplicative retries to improve system health (@jakecoffman) [#5085](https://github.com/dependabot/dependabot-core/pull/5085)
+- fix debase build errors (@jakecoffman) [#5078](https://github.com/dependabot/dependabot-core/pull/5078)
+
+## v0.183.0, 29 April 2022
+
+- fix unsafe directory git issues during updates (@jakecoffman) [#5065](https://github.com/dependabot/dependabot-core/pull/5065)
+
+## v0.182.4, 26 April 2022
+
+- Rollback RubyGems from 3.3.11 to 3.2.20 (@mctofu) [#5048](https://github.com/dependabot/dependabot-core/pull/5048)
+
+## v0.182.3, 25 April 2022
+
+- Set BUNDLER_VERSION to the specific installed version in native helpers (@brrygrdn) [#5044](https://github.com/dependabot/dependabot-core/pull/5044)
+
+## v0.182.2, 25 April 2022
+
+- Manually revert "nuget: fix PR missing commits in message when using private registry" (@brrygrdn) [#5040](https://github.com/dependabot/dependabot-core/pull/5040)
+
+## v0.182.1, 25 April 2022
+
+- Prevent KeyError when checking search results (@brrygrdn) [#5038](https://github.com/dependabot/dependabot-core/pull/5038)
+- Update RubyGems and use `--no-document` for updating it (@deivid-rodriguez) [#5035](https://github.com/dependabot/dependabot-core/pull/5035)
+- Translate from `@types` package to library name (@landongrindheim) [#5025](https://github.com/dependabot/dependabot-core/pull/5025)
+- Add ecosystem-specific code owners (@mattt) [#4614](https://github.com/dependabot/dependabot-core/pull/4614)
+- fix typos in GitHub issue bug report template (@tyrann0us) [#5015](https://github.com/dependabot/dependabot-core/pull/5015)
+- Update Bundler from 2.3.10 to 2.3.12 (@deivid-rodriguez) [#5018](https://github.com/dependabot/dependabot-core/pull/5018)
+- build(deps): bump @npmcli/arborist from 5.0.6 to 5.1.0 in /npm_and_yarn/helpers [#5020](https://github.com/dependabot/dependabot-core/pull/5020)
+- Use a temporary Ruby requirement for updating lockfile (@deivid-rodriguez) [#5019](https://github.com/dependabot/dependabot-core/pull/5019)
+
+## v0.182.0, 19 April 2022
+
+- Automate Terraform Platform Detection for Lockfile Hashes [#4905](https://github.com/dependabot/dependabot-core/pull/4905)
+
+## v0.181.0, 19 April 2022
+
+- nuget: fix PR missing commits in message when using private registry [#5002](https://github.com/dependabot/dependabot-core/pull/5002)
+- Map Package Name to Types Package Name [#5001](https://github.com/dependabot/dependabot-core/pull/5001)
+- build(deps-dev): bump phpstan/phpstan from 1.5.5 to 1.5.6 in /composer/helpers/v2 [#5010](https://github.com/dependabot/dependabot-core/pull/5010)
+- build(deps-dev): bump phpstan/phpstan from 1.5.5 to 1.5.6 in /composer/helpers/v1 [#5007](https://github.com/dependabot/dependabot-core/pull/5007)
+- build(deps-dev): bump phpstan/phpstan from 1.5.4 to 1.5.5 in /composer/helpers/v1 [#5005](https://github.com/dependabot/dependabot-core/pull/5005)
+- build(deps-dev): bump phpstan/phpstan from 1.5.4 to 1.5.5 in /composer/helpers/v2 [#5004](https://github.com/dependabot/dependabot-core/pull/5004)
+- build(deps): bump composer/composer from 1.10.25 to 1.10.26 in /composer/helpers/v1 [#4996](https://github.com/dependabot/dependabot-core/pull/4996)
+- build(deps): bump @npmcli/arborist from 5.0.5 to 5.0.6 in /npm_and_yarn/helpers [#4994](https://github.com/dependabot/dependabot-core/pull/4994)
+- build(deps): bump composer/composer from 2.3.4 to 2.3.5 in /composer/helpers/v2 [#4995](https://github.com/dependabot/dependabot-core/pull/4995)
+- build(deps): bump semver from 7.3.6 to 7.3.7 in /npm_and_yarn/helpers [#4990](https://github.com/dependabot/dependabot-core/pull/4990)
+- Adds failing tests for Typescript @types updates [#4992](https://github.com/dependabot/dependabot-core/pull/4992)
+- handle multiple python manifests containing the same dependency [#4969](https://github.com/dependabot/dependabot-core/pull/4969)
+- Python: unwrap arbitrary parentheses from requirement string [#4988](https://github.com/dependabot/dependabot-core/pull/4988)
+- Adding ability to debug into tests from VS Code [#4971](https://github.com/dependabot/dependabot-core/pull/4971)
+- build(deps): bump composer/composer from 2.3.3 to 2.3.4 in /composer/helpers/v2 [#4978](https://github.com/dependabot/dependabot-core/pull/4978)
+- build(deps): bump @npmcli/arborist from 5.0.4 to 5.0.5 in /npm_and_yarn/helpers [#4977](https://github.com/dependabot/dependabot-core/pull/4977)
+- build(deps-dev): update rubocop requirement from ~> 1.26.0 to ~> 1.27.0 in /common [#4986](https://github.com/dependabot/dependabot-core/pull/4986)
+- build(deps): bump pipenv from 2022.3.28 to 2022.4.8 in /python/helpers [#4985](https://github.com/dependabot/dependabot-core/pull/4985)
+- build(deps-dev): bump eslint from 8.12.0 to 8.13.0 in /npm_and_yarn/helpers [#4984](https://github.com/dependabot/dependabot-core/pull/4984)
+- pub: Bump when publish to none (@sigurdm) [#4981](https://github.com/dependabot/dependabot-core/pull/4981)
+- Fix terraform update_range function [#4982](https://github.com/dependabot/dependabot-core/pull/4982)
+- Restore python 3.6 support [#4958](https://github.com/dependabot/dependabot-core/pull/4958)
+
+## v0.180.5, 7 April 2022
+
+- Actions: Fix failed update if version was a partial match for a branch [#4972](https://github.com/dependabot/dependabot-core/pull/4972)
+- build(deps-dev): bump eslint-config-prettier from 8.3.0 to 8.5.0 in /npm_and_yarn/helpers [#4788](https://github.com/dependabot/dependabot-core/pull/4788)
+- build(deps-dev): bump jest from 27.4.7 to 27.5.1 in /npm_and_yarn/helpers [#4719](https://github.com/dependabot/dependabot-core/pull/4719)
+- build(deps-dev): bump eslint from 8.7.0 to 8.12.0 in /npm_and_yarn/helpers [#4918](https://github.com/dependabot/dependabot-core/pull/4918)
+- added php mcrypt extension (@oleg-andreyev) [#4170](https://github.com/dependabot/dependabot-core/pull/4170)
+- build(deps): bump actions/checkout from 2 to 3 [#4783](https://github.com/dependabot/dependabot-core/pull/4783)
+- build(deps): bump semver from 7.3.5 to 7.3.6 in /npm_and_yarn/helpers [#4965](https://github.com/dependabot/dependabot-core/pull/4965)
+- Allow open_timeout to be configured by ENV var [#4964](https://github.com/dependabot/dependabot-core/pull/4964)
+- code is unsused: main packages have no particular effect on dependencies [#4962](https://github.com/dependabot/dependabot-core/pull/4962)
+
+## v0.180.4, 6 April 2022
+
+- Actions: Consider precision of current version when selecting latest [#4953](https://github.com/dependabot/dependabot-core/pull/4953)
+- build(deps): bump composer/composer from 2.2.9 to 2.3.3 in /composer/helpers/v2 [#4944](https://github.com/dependabot/dependabot-core/pull/4944)
+- Update bundler from 2.3.9 to 2.3.10 (@schinery) [#4961](https://github.com/dependabot/dependabot-core/pull/4961)
+- build(deps): bump @npmcli/arborist from 5.0.3 to 5.0.4 in /npm_and_yarn/helpers [#4960](https://github.com/dependabot/dependabot-core/pull/4960)
+- Update pub dependency service (@sigurdm) [#4957](https://github.com/dependabot/dependabot-core/pull/4957)
+- build(deps-dev): bump phpstan/phpstan from 1.4.10 to 1.5.4 in /composer/helpers/v2 [#4946](https://github.com/dependabot/dependabot-core/pull/4946)
+- build(deps-dev): bump phpstan/phpstan from 1.4.10 to 1.5.4 in /composer/helpers/v1 [#4945](https://github.com/dependabot/dependabot-core/pull/4945)
+- build(deps-dev): bump prettier from 2.6.0 to 2.6.2 in /npm_and_yarn/helpers [#4943](https://github.com/dependabot/dependabot-core/pull/4943)
+- build(deps): bump github.com/Masterminds/vcs from 1.13.1 to 1.13.3 in /go_modules/helpers [#4942](https://github.com/dependabot/dependabot-core/pull/4942)
+- Cargo: Update specs to reference latest version of dependency used [#4956](https://github.com/dependabot/dependabot-core/pull/4956)
+
+## v0.180.3, 4 April 2022
+
+- Add support for Python packages with epoch version [#4928](https://github.com/dependabot/dependabot-core/pull/4928)
+- fix error due to not handling case statements in Gemfile [#4949](https://github.com/dependabot/dependabot-core/pull/4949)
+- Remove unnecessary get_directory special cases for npm_and_yarn (@ianlyons) [#4840](https://github.com/dependabot/dependabot-core/pull/4840)
+- Dockerfile: arm64 support (@thepwagner) [#4858](https://github.com/dependabot/dependabot-core/pull/4858)
+- Bump bundler from 2.3.8 to 2.3.9 and automate it [#4884](https://github.com/dependabot/dependabot-core/pull/4884)
+- Remove workaround for broken ruby gems compare (@jeffwidman) [#4933](https://github.com/dependabot/dependabot-core/pull/4933)
+- Fix typo (@jeffwidman) [#4932](https://github.com/dependabot/dependabot-core/pull/4932)
+- Add Ruby 3.1.1 to RubyRequirementSetter version requirements (@schinery) [#4912](https://github.com/dependabot/dependabot-core/pull/4912)
+- Cargo: Update rust toolchain to 1.59.0 [#4921](https://github.com/dependabot/dependabot-core/pull/4921)
+- Metadetafinders: Use the default branch instead of master for gitlab (@dennisvandehoef) [#4916](https://github.com/dependabot/dependabot-core/pull/4916)
+- build(deps): bump pip from 21.3.1 to 22.0.4 in /python/helpers [#4809](https://github.com/dependabot/dependabot-core/pull/4809)
+- Add option `get` to regex that match the `go` cmd (@jeffwidman) [#4911](https://github.com/dependabot/dependabot-core/pull/4911)
+- Handle when `go: downloading` is emitted before an unknown revision error (@jeffwidman) [#4910](https://github.com/dependabot/dependabot-core/pull/4910)
+- build(deps): bump pipenv from 2022.3.24 to 2022.3.28 in /python/helpers [#4919](https://github.com/dependabot/dependabot-core/pull/4919)
+- Bump eslint-plugin-prettier from 2.0.1 to 2.1.1 in /helpers/javascript (@dependabot-preview) [#1](https://github.com/dependabot/dependabot-core/pull/1)
+
+## v0.180.2, 28 March 2022
+
+- Add raise_on_ignore support to Pub [#4894](https://github.com/dependabot/dependabot-core/pull/4894)
+- Bump Dart and Flutter to latest stable versions [#4904](https://github.com/dependabot/dependabot-core/pull/4904)
+- Explicitly import process in npm_and_yarn helper [#4892](https://github.com/dependabot/dependabot-core/pull/4892)
+- build(deps): bump pipenv from 2022.1.8 to 2022.3.24 in /python/helpers [#4900](https://github.com/dependabot/dependabot-core/pull/4900)
+
+## v0.180.1, 23 March 2022
+
+- Npm: Handle `.tar.gz` extensions for path dependencies [#4889](https://github.com/dependabot/dependabot-core/pull/4889)
+- Update pub dependency_service (@sigurdm) [#4890](https://github.com/dependabot/dependabot-core/pull/4890)
+- fixed a bug and improved testing around NuGet version compare [#4881](https://github.com/dependabot/dependabot-core/pull/4881)
+- Fix Ruby version conflict error detection for new Bundler versions (@deivid-rodriguez) [#4820](https://github.com/dependabot/dependabot-core/pull/4820)
+- build(deps-dev): bump friendsofphp/php-cs-fixer from 3.4.0 to 3.8.0 in /composer/helpers/v2 [#4883](https://github.com/dependabot/dependabot-core/pull/4883)
+- Reenable commented out failing specs (@deivid-rodriguez) [#4882](https://github.com/dependabot/dependabot-core/pull/4882)
+- Update Gitlab approvers logic on pr creation (@andrcuns) [#4747](https://github.com/dependabot/dependabot-core/pull/4747)
+- build(deps): update gitlab requirement from = 4.17.0 to = 4.18.0 in /common [#4872](https://github.com/dependabot/dependabot-core/pull/4872)
+- build(deps-dev): bump phpstan/phpstan from 1.4.2 to 1.4.10 in /composer/helpers/v1 [#4850](https://github.com/dependabot/dependabot-core/pull/4850)
+- Improve file_fetcher for GitHub Actions (@JonasAlfredsson) [#4815](https://github.com/dependabot/dependabot-core/pull/4815)
+- build(deps-dev): bump phpstan/phpstan from 1.4.2 to 1.4.10 in /composer/helpers/v2 [#4849](https://github.com/dependabot/dependabot-core/pull/4849)
+- build(deps): update faraday requirement from = 1.7.0 to = 1.10.0 in /common [#4871](https://github.com/dependabot/dependabot-core/pull/4871)
+- build(deps-dev): update rubocop requirement from ~> 1.23.0 to ~> 1.26.0 in /common [#4870](https://github.com/dependabot/dependabot-core/pull/4870)
+- build(deps): bump composer/composer from 2.2.6 to 2.2.9 in /composer/helpers/v2 [#4861](https://github.com/dependabot/dependabot-core/pull/4861)
+- build(deps-dev): bump prettier from 2.5.1 to 2.6.0 in /npm_and_yarn/helpers [#4880](https://github.com/dependabot/dependabot-core/pull/4880)
+- pub metadata_finder: Fall back to `homepage` if `repository` is not present (@sigurdm) [#4879](https://github.com/dependabot/dependabot-core/pull/4879)
+
+## v0.180.0, 18 March 2022
+
+- Upgrade main Python version to 3.10.3 (@ulgens) [#4874](https://github.com/dependabot/dependabot-core/pull/4874)
+- build(deps): bump @npmcli/arborist from 4.2.1 to 5.0.3 in /npm_and_yarn/helpers [#4877](https://github.com/dependabot/dependabot-core/pull/4877)
+- Modify ENV in a friendlier way during specs (@deivid-rodriguez) [#4865](https://github.com/dependabot/dependabot-core/pull/4865)
+- Bump to `go` `1.18` (@jeffwidman) [#4853](https://github.com/dependabot/dependabot-core/pull/4853)
+- Fix Bundler 1 spec failures (@deivid-rodriguez) [#4869](https://github.com/dependabot/dependabot-core/pull/4869)
+- Require Ruby 2.7 (@deivid-rodriguez) [#4864](https://github.com/dependabot/dependabot-core/pull/4864)
+- Bugfix: Include space in regex capturing group (@jeffwidman) [#4868](https://github.com/dependabot/dependabot-core/pull/4868)
+- Get bundler specs green when run on Ruby 3.1 (@deivid-rodriguez) [#4841](https://github.com/dependabot/dependabot-core/pull/4841)
+- NuGet version comparison fix [#4862](https://github.com/dependabot/dependabot-core/pull/4862)
+
+## v0.179.0, 16 March 2022
+
+- Bump Ubuntu to 20.04 (@jeffwidman) [#4394](https://github.com/dependabot/dependabot-core/pull/4394)
+- Use expanded path when DEPENDABOT_NATIVE_HELPERS_PATH not set (@deivid-rodriguez) [#4844](https://github.com/dependabot/dependabot-core/pull/4844)
+- Fix flaky spec failure on Bundler 1 suite (@deivid-rodriguez) [#4846](https://github.com/dependabot/dependabot-core/pull/4846)
+- Unify RSpec requirements in helpers Gemfiles to match dependabot-common (@deivid-rodriguez) [#4843](https://github.com/dependabot/dependabot-core/pull/4843)
+- Remove duplicated spec (@deivid-rodriguez) [#4839](https://github.com/dependabot/dependabot-core/pull/4839)
+- Fix webmock requirement in helpers Gemfiles to match dependabot-common (@deivid-rodriguez) [#4838](https://github.com/dependabot/dependabot-core/pull/4838)
+- Enable codeql [#4817](https://github.com/dependabot/dependabot-core/pull/4817)
+- Improve `DEBUG_HELPERS` output (@deivid-rodriguez) [#4827](https://github.com/dependabot/dependabot-core/pull/4827)
+- Fix some specs to pass outside of Docker (@deivid-rodriguez) [#4835](https://github.com/dependabot/dependabot-core/pull/4835)
+
+## v0.178.1, 11 March 2022
+
+- Fixes comparison between prerelease identifiers for NuGet [#4833](https://github.com/dependabot/dependabot-core/pull/4833)
+
+## v0.178.0, 10 March 2022
+
+- Disable spec fetching retries which are not functioning properly [#4823](https://github.com/dependabot/dependabot-core/pull/4823)
+- build(deps): bump cython from 0.29.27 to 0.29.28 in /python/helpers [#4750](https://github.com/dependabot/dependabot-core/pull/4750)
+- Update ci-test script to use bundler 2.3.8 (@deivid-rodriguez) [#4824](https://github.com/dependabot/dependabot-core/pull/4824)
+- Bump erlang from 23.3.4.5 to 24.2.1 [#4816](https://github.com/dependabot/dependabot-core/pull/4816)
+- Remove unnecessary pub cert config [#4814](https://github.com/dependabot/dependabot-core/pull/4814)
+- Pin nuget vcr cassette names [#4818](https://github.com/dependabot/dependabot-core/pull/4818)
+- github_actions: Add support for Composite Actions (@JonasAlfredsson) [#4755](https://github.com/dependabot/dependabot-core/pull/4755)
+- Note that the `--dir` flag is required for subdirs (@jeffwidman) [#4812](https://github.com/dependabot/dependabot-core/pull/4812)
+- Fix `detect_indentation` nil access error [#4802](https://github.com/dependabot/dependabot-core/pull/4802)
+
+## v0.177.0, 4 March 2022
+
+- Pub: use system root certificates [#4794](https://github.com/dependabot/dependabot-core/pull/4794)
+- Bump bundler to 2.3.8 [#4786](https://github.com/dependabot/dependabot-core/pull/4786)
+- pub support for requirement_update_strategy (@sigurdm) [#4778](https://github.com/dependabot/dependabot-core/pull/4778)
+- Attempt to fix `*-*` range handling (@Danielku15) [#4749](https://github.com/dependabot/dependabot-core/pull/4749)
+- Update NuGet to fetch packages using SemVer 2 [#4255](https://github.com/dependabot/dependabot-core/pull/4255)
+- Update npm 7 references to npm 8 [#4771](https://github.com/dependabot/dependabot-core/pull/4771)
+- build(deps): bump object-path from 0.11.5 to 0.11.8 in /npm_and_yarn/helpers [#4772](https://github.com/dependabot/dependabot-core/pull/4772)
+
+## v0.176.0, 28 February 2022
+
+- Beta: Dart/Flutter pub support (@sigurdm) [#4510](https://github.com/dependabot/dependabot-core/pull/4510)
+  While now available in dependabot-core, this will require some more work before we
+  can roll this out in the GitHub-hosted version of Dependabot.
+- Disable flaky bundler1 test [#4767](https://github.com/dependabot/dependabot-core/pull/4767)
+
+## v0.175.0, 25 February 2022
+
+- Update to npm 8 [#4763](https://github.com/dependabot/dependabot-core/pull/4763)
+  This includes a subtle change with how indentation in lockfiles is handled, in
+  npm 8 the indentation from the package.json file is used, whereas before the
+  package-lock.json would keep it's own indentation. Other than that 8 should be
+  mostly backwards compatible. We suggest updating to npm 8 though, as 7 is no
+  longer officially supported by the npm team.
+
+## v0.174.1, 22 February 2022
+
+- Temporarily revert Docker arg from support [#4759](https://github.com/dependabot/dependabot-core/pull/4759)
+- Fix references to changelog path/contents in bump_version.rb [#4756](https://github.com/dependabot/dependabot-core/pull/4756)
+
+## v0.174.0, 18 February 2022
+
+- Bump Terraform from 1.0.11 to 1.1.6 [#4748](https://github.com/dependabot/dependabot-core/pull/4748)
+- Codecommit pr release bugfix (@dwc0011) [#4745](https://github.com/dependabot/dependabot-core/pull/4745)
+- Support depname.version = "1.2.3" syntax in TOML (@roblabla) [#4738](https://github.com/dependabot/dependabot-core/pull/4738)
+- Add `--dry-run` flag to `bump-version` script [#4736](https://github.com/dependabot/dependabot-core/pull/4736)
+
+## v0.173.0, 14 February 2022
+
+- Update node to latest LTS version (16.x) [#4733](https://github.com/dependabot/dependabot-core/pull/4733)
+- build(deps): bump poetry from 1.1.12 to 1.1.13 in /python/helpers [#4732](https://github.com/dependabot/dependabot-core/pull/4732)
+
+## v0.172.2, 10 February 2022
+
+- Bump go from 1.17.5 to 1.17.7 [#4730](https://github.com/dependabot/dependabot-core/pull/4730)
+
+## v0.172.1, 9 February 2022
+
+- Docker: Ignore ARGs without default values [#4723](https://github.com/dependabot/dependabot-core/pull/4723)
+- build(deps): bump pip-tools from 6.5.0 to 6.5.1 in /python/helpers [#4718](https://github.com/dependabot/dependabot-core/pull/4718)
+
+## v0.172.0, 9 February 2022
+
+- Verify the right version of composer is installed in helper and docker [#4716](https://github.com/dependabot/dependabot-core/pull/4716)
+- Bump composer v1 binary from 1.10.24 to 1.10.25 [#4717](https://github.com/dependabot/dependabot-core/pull/4717)
+- Docker: Support ARG FROM (@hfhbd) [#4598](https://github.com/dependabot/dependabot-core/pull/4598)
+- Fix peer dependency regex for cases with 2 semver constraints (@FaHeymann) [#4693](https://github.com/dependabot/dependabot-core/pull/4693)
+- build(deps): bump composer/composer from 2.2.5 to 2.2.6 in /composer/helpers/v2 [#4708](https://github.com/dependabot/dependabot-core/pull/4708)
+- Link to GitHub feedback discussion for Dependabot [#4714](https://github.com/dependabot/dependabot-core/pull/4714)
+- Fix Running with Docker section to find the image that was just pulled (@joshuabremerdexcom) [#4694](https://github.com/dependabot/dependabot-core/pull/4694)
+- build(deps): bump cython from 0.29.26 to 0.29.27 in /python/helpers [#4686](https://github.com/dependabot/dependabot-core/pull/4686)
+- build(deps): bump pip-tools from 6.4.0 to 6.5.0 in /python/helpers [#4706](https://github.com/dependabot/dependabot-core/pull/4706)
+
+## v0.171.5, 7 February 2022
+
+- Optimize rust toolchain installation [#4711](https://github.com/dependabot/dependabot-core/pull/4711)
+- Fix typo: `developerment` -> `development` (@jeffwidman) [#4705](https://github.com/dependabot/dependabot-core/pull/4705)
+- Fix typo: `is does` --> `executes` (@jeffwidman) [#4704](https://github.com/dependabot/dependabot-core/pull/4704)
+- Add support for Python 3.9.10 (@Dresdn) [#4692](https://github.com/dependabot/dependabot-core/pull/4692)
+- Bump cargo from 1.51.0 to 1.58.0 [#4677](https://github.com/dependabot/dependabot-core/pull/4677)
+
 ## v0.171.4, 27 January 2022
 
 - Nuget: Adding "devDependencies" support (@mwaddell) [#4671](https://github.com/dependabot/dependabot-core/pull/4671)

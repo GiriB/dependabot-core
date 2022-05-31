@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# This script is does a full update run for a given repo (optionally for a
+# This script executes a full update run for a given repo (optionally for a
 # specific dependency only), and shows the proposed changes to any dependency
 # files without actually creating a pull request.
 #
@@ -32,13 +32,14 @@
 # - submodules
 # - docker
 # - terraform
+# - pub
 
 # rubocop:disable Style/GlobalVars
 
 require "etc"
 unless Etc.getpwuid(Process.uid).name == "dependabot"
   puts <<~INFO
-    bin/dry-run.rb is only supported in a developerment container.
+    bin/dry-run.rb is only supported in a development container.
 
     Please use bin/docker-dev-shell first.
   INFO
@@ -60,6 +61,7 @@ $LOAD_PATH << "./maven/lib"
 $LOAD_PATH << "./npm_and_yarn/lib"
 $LOAD_PATH << "./nuget/lib"
 $LOAD_PATH << "./python/lib"
+$LOAD_PATH << "./pub/lib"
 $LOAD_PATH << "./terraform/lib"
 
 require "bundler"
@@ -96,6 +98,7 @@ require "dependabot/maven"
 require "dependabot/npm_and_yarn"
 require "dependabot/nuget"
 require "dependabot/python"
+require "dependabot/pub"
 require "dependabot/terraform"
 
 # GitHub credentials with write permission to the repo you want to update
@@ -458,6 +461,14 @@ end
 
 StackProf.start(raw: true) if $options[:profile]
 
+
+$network_trace_count = 0
+ActiveSupport::Notifications.subscribe(/excon.request/) do |*args|
+  $network_trace_count += 1
+  payload = args.last
+  puts "🌍 #{payload[:scheme]}//#{payload[:host]}:#{payload[:port]}#{payload[:path]}"
+end
+
 $source = Dependabot::Source.new(
   provider: $options[:provider],
   repo: $repo_name,
@@ -770,6 +781,8 @@ end
 
 StackProf.stop if $options[:profile]
 StackProf.results("tmp/stackprof-#{Time.now.strftime('%Y-%m-%d-%H:%M')}.dump") if $options[:profile]
+
+puts "🌍 Total requests made: '#{$network_trace_count}'"
 
 # rubocop:enable Metrics/BlockLength
 
