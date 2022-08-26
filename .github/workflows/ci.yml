@@ -8,7 +8,7 @@ on:
       - "CHANGELOG.md"
       - "common/lib/dependabot/version.rb"
     branches:
-      - "main"
+      - "**"
   schedule:
     - cron: "0 0 * * *"
 
