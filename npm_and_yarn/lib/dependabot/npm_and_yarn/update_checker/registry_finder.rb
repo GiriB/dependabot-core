@@ -55,7 +55,7 @@ module Dependabot
             known_registries.find do |details|
               response = Excon.get(
                 "https://#{details['registry'].
-                gsub("\s", "%20").
+                gsub(/\s+/, "%20").
                 gsub(%r{/+$}, '')}/"\
                 "#{escaped_dependency_name}",
                 idempotent: true,
