@@ -160,7 +160,7 @@ RSpec.describe Dependabot::NpmAndYarn::UpdateChecker::RegistryFinder do
             to_return(status: 200, body: body)
         end
         
-        it { is_expected.to eq("npm.fury.io/dependabot   with space") }
+        it { is_expected.to eq("npm.fury.io/dependabot%20with%20space") }
       end
 
       context "in .yarnrc file" do
@@ -176,7 +176,7 @@ RSpec.describe Dependabot::NpmAndYarn::UpdateChecker::RegistryFinder do
           stub_request(:get, url).to_return(status: 200, body: body)
         end
 
-        it { is_expected.to eq("npm-proxy.fury.io/password/dependabot with space") }
+        it { is_expected.to eq("npm-proxy.fury.io/password/dependabot%20with%20space") }
       end
     end
     

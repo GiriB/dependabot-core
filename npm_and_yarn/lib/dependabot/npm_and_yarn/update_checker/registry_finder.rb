@@ -54,9 +54,7 @@ module Dependabot
           @first_registry_with_dependency_details ||=
             known_registries.find do |details|
               response = Excon.get(
-                "https://#{details['registry'].
-                gsub(/\s+/, "%20").
-                gsub(%r{/+$}, '')}/"\
+                "https://#{details['registry'].gsub(%r{/+$}, '')}/"\
                 "#{escaped_dependency_name}",
                 idempotent: true,
                 **SharedHelpers.excon_defaults(
@@ -139,12 +137,15 @@ module Dependabot
           registries = []
           npmrc_file.content.scan(NPM_AUTH_TOKEN_REGEX) do
             next if Regexp.last_match[:registry].include?("${")
+            registry = Regexp.last_match[:registry]
+            token = Regexp.last_match[:token]&.strip
 
             registries << {
               "type" => "npm_registry",
-              "registry" => Regexp.last_match[:registry],
-              "token" => Regexp.last_match[:token]&.strip
+              "registry" => registry.gsub(/\s+/, "%20"),
+              "token" => token
             }
+
           end
 
           npmrc_file.content.scan(NPM_GLOBAL_REGISTRY_REGEX) do
@@ -152,7 +153,8 @@ module Dependabot
 
             registry = Regexp.last_match[:registry].strip.
                        sub(%r{/+$}, "").
-                       sub(%r{^.*?//}, "")
+                       sub(%r{^.*?//}, "").
+                       gsub(/\s+/, "%20")
             next if registries.map { |r| r["registry"] }.include?(registry)
 
             registries << {
@@ -174,7 +176,8 @@ module Dependabot
 
             registry = Regexp.last_match[:registry].strip.
                        sub(%r{/+$}, "").
-                       sub(%r{^.*?//}, "")
+                       sub(%r{^.*?//}, "").
+                       gsub(/\s+/, "%20")
             registries << {
               "type" => "npm_registry",
               "registry" => registry,
@@ -202,7 +205,8 @@ module Dependabot
 
             registry = Regexp.last_match[:registry].strip.
                        sub(%r{/+$}, "").
-                       sub(%r{^.*?//}, "")
+                       sub(%r{^.*?//}, "").
+                       gsub(/\s+/, "%20")
             return registry
           end
 
@@ -211,7 +215,8 @@ module Dependabot
 
             registry = Regexp.last_match[:registry].strip.
                        sub(%r{/+$}, "").
-                       sub(%r{^.*?//}, "")
+                       sub(%r{^.*?//}, "").
+                       gsub(/\s+/, "%20")
             return registry
           end
 
