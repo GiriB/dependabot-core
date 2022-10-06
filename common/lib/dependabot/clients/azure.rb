@@ -209,6 +209,11 @@ module Dependabot
 
       def create_commit(branch_name, base_commit, commit_message, files,
                         author_details)
+
+        if author_details.nil?
+          author_details = { name: authenticated_user, email: "#{authenticated_user}@microsoft.com" }
+        end
+
         content = {
           refUpdates: [
             { name: "refs/heads/" + branch_name, oldObjectId: base_commit }
@@ -278,6 +283,16 @@ module Dependabot
                         "/refs?api-version=5.0", content.to_json)
 
         JSON.parse(response.body).fetch("value").first
+      end
+
+      def authenticated_user
+        @authenticated_user ||=
+        begin
+          response = get(source.api_endpoint +
+            source.organization + '/_apis/connectiondata')
+
+          JSON.parse(response.body).fetch('authenticatedUser').fetch('providerDisplayName')
+        end
       end
       # rubocop:enable Metrics/ParameterLists
 

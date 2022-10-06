@@ -117,6 +117,7 @@ RSpec.describe Dependabot::Clients::Azure do
     end
 
     let(:commit_url) { repo_url + "/pushes?api-version=5.0" }
+    let(:authenticated_user_details_url) { source.api_endpoint + source.org + '/_apis/connectiondata'}
 
     context "when response is 403" do
       let(:author_details) do
@@ -139,11 +140,14 @@ RSpec.describe Dependabot::Clients::Azure do
         stub_request(:post, commit_url).
           with(basic_auth: [username, password]).
           to_return(status: 200)
+        stub_request(:get, authenticated_user_details_url).
+          with(basic_auth: [username, password]).
+          to_return(status: 200, body: fixture("azure", "authenticated_user_details.json"))
       end
 
       context "when author_details is nil" do
-        let(:author_details) { nil }
-        it "pushes commit without author property" do
+        let(:author_details) { name: "XYZ", email: "XYZ@microsoft.com" }
+        it "pushes commit with authenticated user details as the author property" do
           create_commit
 
           expect(WebMock).
@@ -152,8 +156,8 @@ RSpec.describe Dependabot::Clients::Azure do
                 with do |req|
                   json_body = JSON.parse(req.body)
                   expect(json_body.fetch("commits").count).to eq(1)
-                  expect(json_body.fetch("commits").first.keys).
-                    to_not include("author")
+                  expect(json_body.fetch("commits").first.fetch("author")).
+                    to eq(author_details.transform_keys(&:to_s))
                 end
             )
         end
@@ -539,6 +543,55 @@ RSpec.describe Dependabot::Clients::Azure do
     context "when response code is 404" do
       before do
         stub_request(:get, repository_details_fetch_url).
+          with(basic_auth: [username, password]).
+          to_return({ status: 404 })
+      end
+
+      it "raises a helpful error" do
+        expect { subject }.to raise_error(Dependabot::Clients::Azure::NotFound)
+      end
+    end
+  end
+
+  desribe "#autheticated_user" do
+    subject(:authenticated_user) { client.authenticated_user }
+    let(:authenticated_user_details_url) { source.api_endpoint + source.org + '/_apis/connectiondata'}
+
+    context "when response code is 200" do
+      response_body = fixture("azure", "authenticated_user_details.json")
+
+      before do
+        stub_request(:get, authenticated_user_url).
+          with(basic_auth: [username, password]).
+          to_return({ status: 200, body: response_body })
+      end
+
+      let(:authenticated_user_name) { 'XYZ' }
+
+      it "returns the repo details" do
+        authenticated_user = authenticated_user
+
+        # Expect
+        expect(authenticated_user).not_to be_nil
+        expect(authenticated_user).to eq(authenticated_user_name)
+      end
+    end
+
+    context "when response code is 401" do
+      before do
+        stub_request(:get, authenticated_user_details_url).
+          with(basic_auth: [username, password]).
+          to_return({ status: 401 })
+      end
+
+      it "raises a helpful error" do
+        expect { subject }.to raise_error(Dependabot::Clients::Azure::Unauthorized)
+      end
+    end
+
+    context "when response code is 404" do
+      before do
+        stub_request(:get, authenticated_user_details_url).
           with(basic_auth: [username, password]).
           to_return({ status: 404 })
       end
