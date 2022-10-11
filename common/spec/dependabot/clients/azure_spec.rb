@@ -626,7 +626,8 @@ RSpec.describe Dependabot::Clients::Azure do
           # Request succeeds on thrid attempt
           stub_request(:post, base_url).
             with(basic_auth: [username, password], body: @request_body).
-            to_return({ status: 503 }, { status: 503 }, { status: 200 })
+            to_raise(Excon::Error::Timeout).then
+            .to_return({ status: 503 }, { status: 200 })
 
           response = client.post(base_url, @request_body)
           expect(response.status).to eq(200)
