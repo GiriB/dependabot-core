@@ -27,6 +27,8 @@ module Dependabot
 
       MAX_PR_DESCRIPTION_LENGTH = 3999
 
+      ALLOWED_FRAMEWORK_IDENTITIES = ["Component Governance MS Dependabot"].freeze
+
       #######################
       # Constructor methods #
       #######################
@@ -211,7 +213,13 @@ module Dependabot
                         author_details)
 
         if author_details.nil?
-          author_details = { name: authenticated_user, email: "#{authenticated_user}@microsoft.com" }
+          authenticated_user_details = authenticated_user
+          authenticated_user_name = authenticated_user_details.fetch("providerDisplayName")
+          authenticated_user_email = authenticated_user_details.fetch("descriptor").split("\\")[1]
+          if ALLOWED_FRAMEWORK_IDENTITIES.include? authenticated_user_email
+            authenticated_user_email = "#{authenticated_user_email}@microsoft.com"
+          end
+          author_details = { name: authenticated_user_name, email: authenticated_user_email }
         end
 
         content = {
@@ -287,12 +295,12 @@ module Dependabot
 
       def authenticated_user
         @authenticated_user ||=
-        begin
-          response = get(source.api_endpoint +
-            source.organization + '/_apis/connectiondata')
+          begin
+            response = get(source.api_endpoint +
+              source.organization + "/_apis/connectiondata")
 
-          JSON.parse(response.body).fetch('authenticatedUser').fetch('providerDisplayName')
-        end
+            JSON.parse(response.body).fetch("authenticatedUser")
+          end
       end
       # rubocop:enable Metrics/ParameterLists
 
