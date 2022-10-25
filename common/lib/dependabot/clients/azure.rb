@@ -23,7 +23,7 @@ module Dependabot
 
       class BadRequest < StandardError; end
 
-      RETRYABLE_ERRORS = [InternalServerError, BadGateway, ServiceNotAvailable].freeze
+      RETRYABLE_ERRORS = [InternalServerError, BadGateway, ServiceNotAvailable, Excon::Error::Timeout].freeze
 
       MAX_PR_DESCRIPTION_LENGTH = 3999
 
