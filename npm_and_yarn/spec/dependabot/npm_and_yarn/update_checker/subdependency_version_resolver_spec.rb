@@ -88,8 +88,13 @@ RSpec.describe namespace::SubdependencyVersionResolver do
       it { is_expected.to eq(Gem::Version.new("5.7.4")) }
     end
 
+<<<<<<< HEAD
     context "with a npm7 package-lock.json" do
       let(:dependency_files) { project_dependency_files("npm7/subdependency_update") }
+=======
+    context "with a npm8 package-lock.json" do
+      let(:dependency_files) { project_dependency_files("npm8/subdependency_update") }
+>>>>>>> bb84f6c03bd6283c7c83774d41272fd3b07fbbe6
 
       let(:dependency) do
         Dependabot::Dependency.new(

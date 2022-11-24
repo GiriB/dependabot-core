@@ -132,6 +132,10 @@ RSpec.describe Dependabot::Clients::Azure do
       it "raises a helpful error" do
         expect { subject }.to raise_error(Dependabot::Clients::Azure::Forbidden)
       end
+
+      it "raises a helpful error" do
+        expect { subject }.to raise_error(Dependabot::Clients::Azure::TagsCreationForbidden)
+      end
     end
 
     context "when response is 200" do

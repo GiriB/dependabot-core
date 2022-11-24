@@ -23,7 +23,11 @@ module Dependabot
           case source.provider
           when "github" then "#{source.url}/releases"
           when "gitlab", "azure" then "#{source.url}/tags"
+<<<<<<< HEAD
           when "bitbucket" then nil
+=======
+          when "bitbucket", "codecommit" then nil
+>>>>>>> bb84f6c03bd6283c7c83774d41272fd3b07fbbe6
           else raise "Unexpected repo provider '#{source.provider}'"
           end
         end

@@ -13,6 +13,7 @@ module Dependabot
 
       PRIVATE_MODULE_ERROR = /Could not download module.*code from\n.*\"(?<repo>\S+)\":/.freeze
       MODULE_NOT_INSTALLED_ERROR =  /Module not installed.*module\s*\"(?<mod>\S+)\"/m.freeze
+      GIT_HTTPS_PREFIX = %r{^git::https://}.freeze
 
       def self.updated_files_regex
         [/\.tf$/, /\.hcl$/]
@@ -149,7 +150,16 @@ module Dependabot
           output = e.message
 
           if output.match?(PRIVATE_MODULE_ERROR)
+<<<<<<< HEAD
             raise PrivateSourceAuthenticationFailure, output.match(PRIVATE_MODULE_ERROR).named_captures.fetch("repo")
+=======
+            repo = output.match(PRIVATE_MODULE_ERROR).named_captures.fetch("repo")
+            if repo.match?(GIT_HTTPS_PREFIX)
+              repo = repo.sub(GIT_HTTPS_PREFIX, "")
+              repo = repo.sub(/\.git$/, "")
+            end
+            raise PrivateSourceAuthenticationFailure, repo
+>>>>>>> bb84f6c03bd6283c7c83774d41272fd3b07fbbe6
           end
 
           raise Dependabot::DependencyFileNotResolvable, "Error running `terraform init`: #{output}"
