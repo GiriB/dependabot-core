@@ -168,6 +168,21 @@ async function updateDependencyFile(
   // Despite the innocent-sounding name, this actually does all the hard work
   await add.init();
 
+  // NOTE: currently for yarn v1, `add` command does not handle "resolutions" in package.json and this leads to addition of unrelated dependency updates in lockfile.
+  // Hence we have changed the update workflow for yarn from dependabot-core to avoid these unrelated updates.
+  // Instead of using `yarn add` to make the changes in the lockfile, we will be using `yarn install` command.
+
+  // Revert changes in lockfile due to yarn add to allow yarn install to make only relevant changes to the lockfile.
+  fs.writeFileSync(
+    path.join(directory, "yarn.lock"),
+    originalYarnLock
+  );
+
+  // Run install to add changes in lockfile according to "resolutions" and current version update in manifest file.
+  const lockfile2 = await Lockfile.fromDirectory(directory, reporter);
+  const install2 = new LightweightInstall(flags, config, reporter, lockfile2);
+  await install2.init();
+
   const dedupedYarnLock = fixDuplicates(readFile("yarn.lock"), depName);
 
   const newVersionRequirement = requirements.requirement;
@@ -193,10 +208,6 @@ async function updateDependencyFile(
     path.join(directory, requirements.file),
     originalPackageJson
   );
-
-  const lockfile2 = await Lockfile.fromDirectory(directory, reporter);
-  const install2 = new LightweightInstall(flags, config, reporter, lockfile2);
-  await install2.init();
 
   let updatedYarnLock = readFile("yarn.lock");
   updatedYarnLock = recoverVersionComments(originalYarnLock, updatedYarnLock);
