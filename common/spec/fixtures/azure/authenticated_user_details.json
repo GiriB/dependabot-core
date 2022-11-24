@@ -1,0 +1,41 @@
+{
+    "authenticatedUser": {
+      "id": "854e434d-b904-664a-b566-2d668372940c",
+      "descriptor": "Microsoft.IdentityModel.Claims.ClaimsIdentity;72f988bf-86f1-41af-91ab-2d7cd011db47\\xyz@microsoft.com",
+      "subjectDescriptor": "aad.ODU0ZTQzNGQtYjkwNC03NjRhLWI1NjYtMmQ2NjgzNzI5NDBj",
+      "providerDisplayName": "XYZ",
+      "isActive": true,
+      "properties": {
+        "Account": {
+          "$type": "System.String",
+          "$value": "xyz@microsoft.com"
+        }
+      },
+      "resourceVersion": 2,
+      "metaTypeId": 0
+    },
+    "authorizedUser": {
+      "id": "854e434d-b904-664a-b566-2d668372940c",
+      "descriptor": "Microsoft.IdentityModel.Claims.ClaimsIdentity;72f988bf-86f1-41af-91ab-2d7cd011db47\\xyz@microsoft.com",
+      "subjectDescriptor": "aad.ODU0ZTQzNGQtYjkwNC03NjRhLWI1NjYtMmQ2NjgzNzI5NDBj",
+      "providerDisplayName": "XYZ",
+      "isActive": true,
+      "properties": {
+        "Account": {
+          "$type": "System.String",
+          "$value": "xyz@microsoft.com"
+        }
+      },
+      "resourceVersion": 2,
+      "metaTypeId": 0
+    },
+    "instanceId": "a2fba5bb-e91f-4218-8d9f-3ba6468216b4",
+    "deploymentId": "76e9b14b-0007-5685-a969-1a5852267453",
+    "deploymentType": "hosted",
+    "locationServiceData": {
+      "serviceOwner": "00025394-6065-48ca-87d9-7f5672854ef7",
+      "defaultAccessMappingMoniker": "PublicAccessMapping",
+      "lastChangeId": 210137168,
+      "lastChangeId64": 210137168
+    }
+  }
