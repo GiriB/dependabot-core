@@ -71,7 +71,7 @@ module Dependabot
           return latest_allowable_version if git_dependency?(dependency)
           return if part_of_tightly_locked_monorepo?
 
-          return latest_allowable_version unless relevant_unmet_peer_dependencies.any?
+          return latest_allowable_version #unless relevant_unmet_peer_dependencies.any?
 
           satisfying_versions.first
         end
