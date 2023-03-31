@@ -4,7 +4,7 @@ module Dependabot
   module NpmAndYarn
     module NativeHelpers
       def self.helper_path
-        "node #{File.join(native_helpers_root, 'run.js')}"
+        "node --max-old-space-size=4096 #{File.join(native_helpers_root, 'run.js')}"
       end
 
       def self.native_helpers_root
